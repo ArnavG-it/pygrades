@@ -202,7 +202,9 @@ class GradeTracker(cmd.Cmd):
         return line.lower()
     
     def do_summary(self, line):
-        course = self.select_course()
+        course, _, _, _ = self.parse_do_grade(line)
+        if not course:
+            course = self.select_course()
 
         table = []
         assessments = self.courses[course]["assessments"].items()
