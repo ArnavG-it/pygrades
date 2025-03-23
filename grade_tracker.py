@@ -1,8 +1,7 @@
 import cmd
-import json
 
-import file_utils as files
-import io_utils as io
+from utils import file_management as files
+from utils import io
 
 SPLASH_MESSAGE = "Welcome to PyGradeTracker! Ctrl + C at any time to exit."
 

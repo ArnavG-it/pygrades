@@ -2,7 +2,7 @@ import os
 import glob
 import json
 
-import io_utils as io
+from utils import io
 from constants import LETTER_GRADES
 
 class OutlineParseError(Exception): pass
