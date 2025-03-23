@@ -97,8 +97,7 @@ class GradeTracker(cmd.Cmd):
                 else:
                     chosen_data = files.create_data(chosen_outline)
 
-        with open(chosen_data, "r") as f:
-            self.courses = json.load(f)
+        self.courses = files.load_data(chosen_data)
 
         filename, _ = files.filename_from_path(chosen_data)
         self.filename = filename
@@ -112,6 +111,7 @@ class GradeTracker(cmd.Cmd):
         pass
 
     def do_grade(self, line):
+        '''Update a grade.'''
         course = self.select_course()
         print(f"Assessments for {course}:")
         (assessment, num) = self.select_assessment(course)
@@ -148,7 +148,19 @@ class GradeTracker(cmd.Cmd):
     def do_exit(self, line):
         '''Exit the program.'''
         print("Exiting...")
+        files.write_data(self.courses, self.filename)
         return True
+    
+    def customloop(self):
+        '''cmdloop wrapper to gracefully exit on KeyboardInterrupt.'''
+        doExit = False
+        while not doExit:
+            try:
+                self.cmdloop()
+            except KeyboardInterrupt:
+                self.do_exit("")
+            finally:
+                doExit = True
 
 if __name__ == '__main__':
-    GradeTracker().cmdloop()
+    GradeTracker().customloop()

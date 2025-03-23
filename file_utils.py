@@ -17,6 +17,17 @@ def filename_from_path(path) -> tuple[str, str]:
     filename = os.path.basename(path)
     [name, ext] = os.path.splitext(filename)
     return name, ext
+
+def write_data(data, filename):
+    if ".json" not in filename:
+        filename += ".json"
+    filepath = os.path.join("data", filename)
+    with open(filepath, 'w') as f:
+        json.dump(data, f, indent=2)
+
+def load_data(filepath) -> dict:
+    with open(filepath, 'r') as f:
+        return json.load(f)
     
 def select_outline() -> str | None:
     '''
@@ -94,19 +105,20 @@ def select_data() -> str | None:
         else:
             return None
 
-def create_data(filename) -> str | None:
+def create_data(outline_filename) -> str | None:
     '''
     Creates a data file based on an outline.
     Returns the filepath of the created file.
     '''
-    filename_without_extension = os.path.splitext(filename)[0]
+    filename_without_extension = os.path.splitext(outline_filename)[0]
 
     data_files = glob.glob("data/*.json")
+    data_files = [os.path.basename(path) for path in data_files]
 
-    data_filepath = os.path.join("data", filename_without_extension + ".json")
+    data_filename = filename_without_extension + ".json"
 
-    if data_filepath in data_files:
-        message = f"Data corresponding to {filename} already exists. Overwrite it? (Y/N) "
+    if data_filename in data_files:
+        message = f"Data corresponding to {data_filename} already exists. Overwrite it? (Y/N) "
         choice = io.input_until_valid(
             message = message,
             repeat_message = "Invalid input. " + message,
@@ -119,13 +131,11 @@ def create_data(filename) -> str | None:
         if choice == 'n':
             return None
 
-    course_data = parse_outline(filename)
+    course_data = parse_outline(outline_filename)
 
-    with open(data_filepath, "w") as f:
-        json.dump(course_data, f, indent=2)
+    write_data(course_data, data_filename)
 
-    filename = filename_without_extension + ".json"
-    return os.path.join("data", filename)
+    return os.path.join("data", data_filename)
 
 def parse_outline(filename) -> dict:
     '''Parses an outline file into a dictionary of courses.'''
