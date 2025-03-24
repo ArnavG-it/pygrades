@@ -188,7 +188,7 @@ def parse_outline(filename) -> dict:
                             "weight": weight,
                             "amount": amount,
                             "dropped": dropped,
-                            "grades": [0] * amount
+                            "grades": [None] * amount
                         }
                     except OutlineParseError as e:
                         print(f"Error parsing line {line_num}, '{line}'")

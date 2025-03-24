@@ -22,7 +22,7 @@ class GradeTracker(cmd.Cmd):
 
     """Helper Functions"""
 
-    def parse_do_grade(self, line: str) -> tuple[str, str, int, int]:
+    def parse_grade(self, line: str) -> tuple[str, str, int, int]:
         course, assessment, number, grade = None, None, None, None
         try:
             if not line:
@@ -31,9 +31,13 @@ class GradeTracker(cmd.Cmd):
             # match course by name or code
             matches = []
             for c in self.courses:
-                name, code = c.split()
-                if name.lower() in line or code.lower() in line:
-                    matches.append(c)
+                name, code = c.lower().split()
+                if name in line or code in line:
+                    if name and code in line:
+                        matches = [c]
+                        break
+                    else:
+                        matches.append(c)
                     
             if len(matches) == 1:
                 course = matches[0]
@@ -204,7 +208,7 @@ class GradeTracker(cmd.Cmd):
     
     def do_summary(self, line):
         '''Summarize grades for a course.'''
-        course, _, _, _ = self.parse_do_grade(line)
+        course, _, _, _ = self.parse_grade(line)
         if not course:
             course = self.select_course()
 
@@ -217,7 +221,7 @@ class GradeTracker(cmd.Cmd):
 
         for name, data in assessments:
             grades = data["grades"]
-            grades_str = ", ".join([f"{grade}" for grade in grades])
+            grades_str = ", ".join([f"{grade}" if grade is not None else "_" for grade in grades])
 
             weight = data["weight"]
 
@@ -236,9 +240,11 @@ class GradeTracker(cmd.Cmd):
 
             table.append([name, grades_str, average_str, achieved_str, weight_str])
         
-        weighted_average /= total_weight / 100
+        weighted_average /= total_weight / 100 if total_weight else 1
+
         total_achieved_str = f"{total_achieved:.2f} %"
         weighted_average_str = f"{weighted_average:.2f} %"
+        
         table.append(["Total", "", weighted_average_str, total_achieved_str, "100 %"])
 
         print(f"{course} Grades:")
@@ -252,7 +258,7 @@ class GradeTracker(cmd.Cmd):
 
     def do_grade(self, line):
         '''Update a grade.'''
-        course, assessment, num, new_grade = self.parse_do_grade(line)
+        course, assessment, num, new_grade = self.parse_grade(line)
         
         if not course:
             course = self.select_course()
@@ -272,13 +278,14 @@ class GradeTracker(cmd.Cmd):
             new_grade = io.input_until_valid(
                 f"Enter the grade for {assessment_str}: ",
                 func = lambda c:
-                    io.in_range(c, 0, 101)
+                    # abitrary upper bound for bonus marks
+                    io.in_range(c, 0, 1000)
             )
             io.clear_lines(1)
         
         current_grade = grades[num]
 
-        if current_grade > 0:
+        if current_grade is not None:
             choice = io.input_until_valid(
                 message = (
                     assessment_str +

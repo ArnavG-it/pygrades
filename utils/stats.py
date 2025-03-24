@@ -6,7 +6,8 @@ def achieved_weight(assessment: dict):
 
     points = 0
     for grade in grades:
-        points += grade
+        if grade:
+            points += grade
 
     achieved_weight = points / (amount * 100) * weight
 
@@ -18,7 +19,7 @@ def interim_weight(assessment: dict):
     ignoring ungraded assessments, in percent.
     '''
     grades = assessment["grades"]
-    grades = list(filter(lambda g: g != 0, grades))
+    grades = list(filter(lambda g: g is not None, grades))
     return average(grades)
 
 def average(l: list):
