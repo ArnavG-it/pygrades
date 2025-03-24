@@ -221,7 +221,15 @@ class GradeTracker(cmd.Cmd):
 
         for name, data in assessments:
             grades = data["grades"]
-            grades_str = ", ".join([f"{grade}" if grade is not None else "_" for grade in grades])
+            grades_str = ", ".join([f"{grade}" for grade in grades if grade is not None])
+
+            ungraded = grades.count(None)
+            if ungraded > 0:
+                if len(grades) > 1:
+                    grades_str += "\n"
+                else:
+                    grades_str += " "
+                grades_str += f"({ungraded} not done)"
 
             weight = data["weight"]
 
@@ -247,7 +255,7 @@ class GradeTracker(cmd.Cmd):
         
         table.append(["Total", "", weighted_average_str, total_achieved_str, "100 %"])
 
-        print(f"{course} Grades:")
+        print(f"-- {course} Grades --")
         print(tabulate(
             table,
             headers=["", "Grades", "Average", "Achieved", "Weight"],
