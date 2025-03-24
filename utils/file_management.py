@@ -151,7 +151,6 @@ def parse_outline(filename) -> dict:
                     # Create a new course
                     current_course = line[len("Course "):]
                     courses[current_course] = {
-                        "name": current_course,
                         "assessments": {},
                         "scale": {}
                     }
