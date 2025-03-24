@@ -4,6 +4,7 @@ from tabulate import tabulate
 
 from utils import file_management as files
 from utils import io
+from utils import stats
 
 class CmdParseException(Exception): pass 
 
@@ -202,6 +203,7 @@ class GradeTracker(cmd.Cmd):
         return line.lower()
     
     def do_summary(self, line):
+        '''Summarize grades for a course.'''
         course, _, _, _ = self.parse_do_grade(line)
         if not course:
             course = self.select_course()
@@ -209,17 +211,44 @@ class GradeTracker(cmd.Cmd):
         table = []
         assessments = self.courses[course]["assessments"].items()
 
+        total_weight = 0
+        total_achieved = 0
+        weighted_average = 0
+
         for name, data in assessments:
             grades = data["grades"]
             grades_str = ", ".join([f"{grade}" for grade in grades])
-            table.append([name, grades_str])
+
+            weight = data["weight"]
+
+            achieved = stats.achieved_weight(data)
+            total_achieved += achieved
+
+            average = stats.interim_weight(data)
+            if average != 0:
+                total_weight += weight
+                weighted_average += average * weight / 100
+
+            achieved_str = f"{achieved:.2f} %"
+            average_str = f"{average:.2f} %"
+
+            weight_str = f"{weight} %"
+
+            table.append([name, grades_str, average_str, achieved_str, weight_str])
         
+        weighted_average /= total_weight / 100
+        total_achieved_str = f"{total_achieved:.2f} %"
+        weighted_average_str = f"{weighted_average:.2f} %"
+        table.append(["Total", "", weighted_average_str, total_achieved_str, "100 %"])
+
         print(f"{course} Grades:")
         print(tabulate(
             table,
-            headers=["Assessment", "Grades"],
-            tablefmt="rounded_outline")
-        )
+            headers=["", "Grades", "Average", "Achieved", "Weight"],
+            tablefmt="rounded_grid",
+            stralign="right",
+            colalign=("right", "left",)
+        ))
 
     def do_grade(self, line):
         '''Update a grade.'''
@@ -234,12 +263,12 @@ class GradeTracker(cmd.Cmd):
 
         grades = self.courses[course]["assessments"][assessment]["grades"]
 
-        if not num:
+        if num is None:
             num = self.select_assessment_number(course, assessment)
 
         assessment_str = assessment + (f" {num + 1}" if len(grades) > 1 else "")
 
-        if not new_grade:
+        if new_grade is None:
             new_grade = io.input_until_valid(
                 f"Enter the grade for {assessment_str}: ",
                 func = lambda c:
@@ -266,6 +295,9 @@ class GradeTracker(cmd.Cmd):
         grades[num] = int(new_grade)
         print(f"Updated {course} {assessment_str} to {new_grade}%.")
     
+    def do_test(self, line):
+        print(stats.achieved_weight(self.courses["COMP 2140"]["assessments"]["Assignment"], True))
+
     def do_exit(self, line):
         '''Exit the program.'''
         print("Exiting...")
