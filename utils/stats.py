@@ -29,3 +29,21 @@ def average(l: list):
     for n in l:
         sum += n
     return sum / len(l)
+
+def filter_dropped(assessment: dict) -> tuple[list, list]:
+    grades = assessment["grades"]
+    num_to_drop = assessment["dropped"]
+    dropped = []
+
+    for grade in grades:
+        if grade is not None:
+            if len(dropped) < num_to_drop:
+                dropped.append(grade)
+            elif grade < max(dropped):
+                dropped[dropped.index(max(dropped))] = grade
+
+    for grade in dropped:
+        grades.remove(grade)
+
+    return grades, dropped
+

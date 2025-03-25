@@ -309,9 +309,6 @@ class GradeTracker(cmd.Cmd):
             
         grades[num] = int(new_grade)
         print(f"Updated {course} {assessment_str} to {new_grade}%.")
-    
-    def do_test(self, line):
-        print(stats.achieved_weight(self.courses["COMP 2140"]["assessments"]["Assignment"], True))
 
     def do_exit(self, line):
         '''Exit the program.'''
