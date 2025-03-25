@@ -1,3 +1,5 @@
+from utils.constants import LETTER_GRADES
+
 def achieved_weight(assessment: dict):
     '''Returns the achieved weight of the assessment, in percent.'''
     weight = int(assessment["weight"])
@@ -31,7 +33,7 @@ def average(l: list):
     return sum / len(l)
 
 def filter_dropped(assessment: dict) -> tuple[list, list]:
-    grades = assessment["grades"]
+    grades: list = assessment["grades"]
     num_to_drop = assessment["dropped"]
     dropped = []
 
@@ -47,3 +49,12 @@ def filter_dropped(assessment: dict) -> tuple[list, list]:
 
     return grades, dropped
 
+def get_letter_grade(course: dict, grade: float):
+    scale = course["scale"].items()
+    letter_grade = ""
+    maximum = 0
+    for letter, value in scale:
+        if grade >= value and value > maximum:
+            maximum = value
+            letter_grade = letter
+    return letter_grade

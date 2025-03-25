@@ -3,7 +3,7 @@ import glob
 import json
 
 from utils import io
-from constants import LETTER_GRADES
+from utils.constants import LETTER_GRADES
 
 class OutlineParseError(Exception): pass
 

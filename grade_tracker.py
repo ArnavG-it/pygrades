@@ -250,8 +250,20 @@ class GradeTracker(cmd.Cmd):
         
         weighted_average /= total_weight / 100 if total_weight else 1
 
-        total_achieved_str = f"{total_achieved:.2f} %"
-        weighted_average_str = f"{weighted_average:.2f} %"
+        total_achieved_letter = stats.get_letter_grade(self.courses[course], total_achieved)
+        weighted_average_letter = stats.get_letter_grade(self.courses[course], weighted_average)
+
+        total_achieved_str = ""
+        if total_achieved_letter:
+            total_achieved_str += f"({total_achieved_letter}) "
+
+        total_achieved_str += f"{total_achieved:.2f} %"
+
+        weighted_average_str = ""
+        if weighted_average_letter:
+            weighted_average_str += f"({weighted_average_letter}) "
+
+        weighted_average_str += f"{weighted_average:.2f} %"
         
         table.append(["Total", "", weighted_average_str, total_achieved_str, "100 %"])
 
