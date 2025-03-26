@@ -21,7 +21,7 @@ def interim_weight(grades: list):
     Returns the achieved weight of the assessment,
     ignoring ungraded assessments, in percent.
     '''
-    grades = list(filter(lambda g: g is not None, grades))
+    grades = filter_ungraded(grades)
     return average(grades)
 
 def average(l: list):
@@ -41,7 +41,7 @@ def filter_dropped(assessment: dict, maximize = True) -> tuple[list, list]:
     grades: list = assessment["grades"][:]
     dropped = []
 
-    filtered_grades = list(filter(lambda g: g is not None, grades))
+    filtered_grades = filter_ungraded(grades)
 
     num_graded = len(filtered_grades)
     num_total = len(grades)
@@ -72,3 +72,9 @@ def get_letter_grade(course: dict, grade: float):
             maximum = value
             letter_grade = letter
     return letter_grade
+
+def filter_ungraded(grades: list):
+    return list(filter(
+        lambda grade: grade is not None,
+        grades
+    ))

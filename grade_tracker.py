@@ -222,7 +222,7 @@ class GradeTracker(cmd.Cmd):
         for name, data in assessments:
             grades = data["grades"]
             kept, dropped = stats.filter_dropped(data)
-            graded = len(list(filter(lambda g: g is not None, grades)))
+            graded = len(stats.filter_ungraded(grades))
 
             # copies for iterative mutation
             kept_copy = kept[:]
