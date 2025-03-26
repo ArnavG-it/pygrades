@@ -221,22 +221,49 @@ class GradeTracker(cmd.Cmd):
 
         for name, data in assessments:
             grades = data["grades"]
-            grades_str = ", ".join([f"{grade}" for grade in grades if grade is not None])
+            kept, dropped = stats.filter_dropped(data)
+            graded = len(list(filter(lambda g: g is not None, grades)))
+
+            # copies for iterative mutation
+            kept_copy = kept[:]
+            dropped_copy = dropped[:]
+
+            # create formatted strings for grades column
+            grades_str = ""
+            i = 1
+            for grade in grades:
+                if grade is not None:
+                    if grade in dropped_copy:
+                        grades_str += f"-{grade}-"
+                        dropped_copy.remove(grade)
+                    else:
+                        grades_str += f"{grade}"
+                        kept_copy.remove(grade)
+                    if i != graded:
+                        grades_str += ", "
+                i += 1
 
             ungraded = grades.count(None)
-            if ungraded > 0:
-                if len(grades) > 1:
-                    grades_str += "\n"
-                else:
-                    grades_str += " "
-                grades_str += f"({ungraded} not done)"
+            to_drop = data["dropped"] - len(dropped)
 
+            if ungraded > 0 or to_drop > 0:
+                grades_str += "\n" if len(grades) > 1 else " "
+                grades_str += "("
+                if ungraded and not to_drop:
+                    grades_str += f"{ungraded} not done"
+                elif to_drop and not ungraded:
+                    grades_str += f"{to_drop} to drop"
+                else:
+                    grades_str += f"{ungraded} not done, {to_drop} to drop"
+                grades_str += ")"
+
+            # calculate and format stats
             weight = data["weight"]
 
             achieved = stats.achieved_weight(data)
             total_achieved += achieved
 
-            average = stats.interim_weight(data)
+            average = stats.interim_weight(kept)
             if average != 0:
                 total_weight += weight
                 weighted_average += average * weight / 100
@@ -246,8 +273,10 @@ class GradeTracker(cmd.Cmd):
 
             weight_str = f"{weight} %"
 
+            # add columns to table
             table.append([name, grades_str, average_str, achieved_str, weight_str])
         
+        # calculate and format totals
         weighted_average /= total_weight / 100 if total_weight else 1
 
         total_achieved_letter = stats.get_letter_grade(self.courses[course], total_achieved)
@@ -265,6 +294,7 @@ class GradeTracker(cmd.Cmd):
 
         weighted_average_str += f"{weighted_average:.2f} %"
         
+        # add last row to table
         table.append(["Total", "", weighted_average_str, total_achieved_str, "100 %"])
 
         print(f"-- {course} Grades --")
@@ -321,6 +351,11 @@ class GradeTracker(cmd.Cmd):
             
         grades[num] = int(new_grade)
         print(f"Updated {course} {assessment_str} to {new_grade}%.")
+
+    def do_test(self, line):
+        quizzes = self.courses["ECE 2262"]["assessments"]["Quiz"]
+        print(stats.filter_dropped(quizzes))
+        print(stats.filter_dropped(quizzes, True))
 
     def do_exit(self, line):
         '''Exit the program.'''

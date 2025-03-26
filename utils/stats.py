@@ -3,11 +3,12 @@ from utils.constants import LETTER_GRADES
 def achieved_weight(assessment: dict):
     '''Returns the achieved weight of the assessment, in percent.'''
     weight = int(assessment["weight"])
-    amount = int(assessment["amount"])
-    grades = assessment["grades"]
+    amount = assessment["amount"] - assessment["dropped"]
+
+    kept, _ = filter_dropped(assessment)
 
     points = 0
-    for grade in grades:
+    for grade in kept:
         if grade:
             points += grade
 
@@ -15,12 +16,11 @@ def achieved_weight(assessment: dict):
 
     return achieved_weight
 
-def interim_weight(assessment: dict):
+def interim_weight(grades: list):
     '''
     Returns the achieved weight of the assessment,
     ignoring ungraded assessments, in percent.
     '''
-    grades = assessment["grades"]
     grades = list(filter(lambda g: g is not None, grades))
     return average(grades)
 
@@ -32,20 +32,34 @@ def average(l: list):
         sum += n
     return sum / len(l)
 
-def filter_dropped(assessment: dict) -> tuple[list, list]:
-    grades: list = assessment["grades"]
-    num_to_drop = assessment["dropped"]
+def filter_dropped(assessment: dict, maximize = True) -> tuple[list, list]:
+    '''
+    Returns two lists: grades after dropping, and the dropped grades.
+    By default, keeps as many grades as possible.
+    If maximize is false, drops as many as possible.
+    '''
+    grades: list = assessment["grades"][:]
     dropped = []
 
-    for grade in grades:
-        if grade is not None:
+    filtered_grades = list(filter(lambda g: g is not None, grades))
+
+    num_graded = len(filtered_grades)
+    num_total = len(grades)
+    num_dropped = assessment["dropped"]
+    if maximize:
+        num_to_drop = max(0, num_graded - (num_total - num_dropped))
+    else:
+        num_to_drop = num_dropped
+
+    if num_to_drop > 0:
+        for grade in filtered_grades:
             if len(dropped) < num_to_drop:
                 dropped.append(grade)
             elif grade < max(dropped):
                 dropped[dropped.index(max(dropped))] = grade
 
-    for grade in dropped:
-        grades.remove(grade)
+        for grade in dropped:
+            grades.remove(grade)
 
     return grades, dropped
 
