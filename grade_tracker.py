@@ -17,7 +17,7 @@ SPLASH = f"""
 """
 
 class GradeTracker(cmd.Cmd):
-    intro = "Type help or ? to list commands."
+    intro = "Type help or ? to list commands.\n"
     prompt = "> "
 
     """Helper Functions"""
@@ -220,14 +220,14 @@ class GradeTracker(cmd.Cmd):
             course = self.select_course()
 
         table = []
-        assessments = self.courses[course]["assessments"].items()
+        assessments = self.courses[course]["assessments"]
 
         total_weight = 0
         total_ungraded_weight = 0
         total_achieved = 0
         weighted_average = 0
 
-        for name, data in assessments:
+        for name, data in assessments.items():
             grades = data["grades"]
             kept, dropped = stats.filter_dropped(data)
             graded = len(stats.filter_ungraded(grades))
@@ -265,16 +265,11 @@ class GradeTracker(cmd.Cmd):
                     grades_str += f"{ungraded} not done, {to_drop} to drop"
                 grades_str += ")"
 
-            # calculate and format stats
+            # calculate and format assessment stats
             weight = data["weight"]
 
             achieved = stats.achieved_weight(data)
-            total_achieved += achieved
-
             average = stats.interim_weight(kept)
-            if average != 0:
-                total_weight += weight
-                weighted_average += average * weight / 100
 
             total_ungraded_weight += graded / (len(grades) - to_drop) * weight
 
@@ -283,11 +278,12 @@ class GradeTracker(cmd.Cmd):
 
             weight_str = f"{weight} %"
 
-            # add columns to table
+            # add row to table
             table.append([name, grades_str, average_str, achieved_str, weight_str])
         
         # calculate and format totals
-        weighted_average /= total_weight / 100 if total_weight else 1
+        total_achieved = stats.total_achieved(assessments)
+        weighted_average = stats.total_weighted_average(assessments)
 
         total_achieved_letter = stats.get_letter_grade(self.courses[course], total_achieved)
         weighted_average_letter = stats.get_letter_grade(self.courses[course], weighted_average)
@@ -315,6 +311,11 @@ class GradeTracker(cmd.Cmd):
             stralign="right",
             colalign=("right", "left",)
         ))
+
+    def do_test(self, line):
+        a = self.courses["COMP 2140"]["assessments"]
+        print(stats.total_weighted_average(a))
+        print(stats.total_achieved(a))
 
     def do_grade(self, line):
         '''Update a grade.'''
@@ -361,6 +362,25 @@ class GradeTracker(cmd.Cmd):
             
         grades[num] = int(new_grade)
         print(f"Updated {course} {assessment_str} to {new_grade}%.")
+
+    def do_scale(self, line):
+        '''Prints the letter grade scale of a course.'''
+        course_name, _, _, _ = self.parse_grade(line)
+        if not course_name:
+            course_name = self.select_course()
+        course = self.courses[course_name]
+
+        weighted_avg = stats.total_weighted_average(course["assessments"])
+        placement = stats.get_letter_grade(course, weighted_avg)
+
+        scale = course["scale"]
+        rows = [f"-- {course_name} Scale --"]
+        for letter, minimum in scale.items():
+            rows.append(f"{letter}\t{minimum}%")
+            if letter == placement:
+                rows[-1] += f" <- Current ({weighted_avg:.2f}%)"
+
+        for row in rows: print(row)
 
     def do_exit(self, line):
         '''Exit the program.'''

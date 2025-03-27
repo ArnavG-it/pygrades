@@ -32,6 +32,29 @@ def average(l: list):
         sum += n
     return sum / len(l)
 
+def total_achieved(assessments: dict):
+    '''Calculates the achieved weight of a course.'''
+    total = 0
+    for name, data in assessments.items():
+        weight = data["weight"]
+        kept, _ = filter_dropped(data)
+        total += interim_weight(kept) * weight / 100
+    return total
+
+def total_weighted_average(assessments: dict):
+    '''Calculates the achieved weighted average of a course.'''
+    completed_weight = 0
+    for name, data in assessments.items():
+        kept, _ = filter_dropped(data)
+        if interim_weight(kept) > 0:
+            completed_weight += data["weight"]
+
+    total = total_achieved(assessments)
+    if completed_weight > 0:
+        total /= completed_weight
+    total *= 100
+    return total
+
 def filter_dropped(assessment: dict, maximize = True) -> tuple[list, list]:
     '''
     Returns two lists: grades after dropping, and the dropped grades.
