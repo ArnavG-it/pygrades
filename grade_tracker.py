@@ -203,6 +203,13 @@ class GradeTracker(cmd.Cmd):
 
         print(f"Loaded grades for {self.filename}.")
 
+    def onecmd(self, line):
+        try:
+            return super().onecmd(line)
+        except KeyboardInterrupt:
+            print(f"\nCancelled '{line}'")
+            return
+
     def precmd(self, line):
         return line.lower()
     
@@ -352,11 +359,6 @@ class GradeTracker(cmd.Cmd):
         grades[num] = int(new_grade)
         print(f"Updated {course} {assessment_str} to {new_grade}%.")
 
-    def do_test(self, line):
-        quizzes = self.courses["ECE 2262"]["assessments"]["Quiz"]
-        print(stats.filter_dropped(quizzes))
-        print(stats.filter_dropped(quizzes, True))
-
     def do_exit(self, line):
         '''Exit the program.'''
         print("Exiting...")
@@ -370,6 +372,7 @@ class GradeTracker(cmd.Cmd):
             try:
                 self.cmdloop()
             except KeyboardInterrupt:
+                print()
                 self.do_exit("")
             finally:
                 doExit = True
