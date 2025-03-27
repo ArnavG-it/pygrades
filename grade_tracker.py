@@ -201,7 +201,7 @@ class GradeTracker(cmd.Cmd):
         filename, _ = files.filename_from_path(chosen_data)
         self.filename = filename
 
-        print(f"Loaded grades for {self.filename}.")
+        print(f"\nLoaded grades for {self.filename}.")
 
     def onecmd(self, line):
         try:
@@ -223,6 +223,7 @@ class GradeTracker(cmd.Cmd):
         assessments = self.courses[course]["assessments"].items()
 
         total_weight = 0
+        total_ungraded_weight = 0
         total_achieved = 0
         weighted_average = 0
 
@@ -275,6 +276,8 @@ class GradeTracker(cmd.Cmd):
                 total_weight += weight
                 weighted_average += average * weight / 100
 
+            total_ungraded_weight += graded / (len(grades) - to_drop) * weight
+
             achieved_str = f"{achieved:.2f} %"
             average_str = f"{average:.2f} %"
 
@@ -304,7 +307,7 @@ class GradeTracker(cmd.Cmd):
         # add last row to table
         table.append(["Total", "", weighted_average_str, total_achieved_str, "100 %"])
 
-        print(f"-- {course} Grades --")
+        print(f"-- {course} Grades -- ({total_ungraded_weight:.1f}% complete)")
         print(tabulate(
             table,
             headers=["", "Grades", "Average", "Achieved", "Weight"],
