@@ -213,6 +213,11 @@ class GradeTracker(cmd.Cmd):
     def precmd(self, line):
         return line.lower()
     
+    def postcmd(self, stop, line):
+        print()
+        if stop:
+            return True
+    
     def do_summary(self, line):
         '''Summarize grades for a course.'''
         course, _, _, _ = self.parse_grade(line)
@@ -305,11 +310,6 @@ class GradeTracker(cmd.Cmd):
             stralign="right",
             colalign=("right", "left",)
         ))
-
-    def do_test(self, line):
-        a = self.courses["COMP 2140"]["assessments"]
-        print(stats.total_weighted_average(a))
-        print(stats.total_achieved(a))
 
     def do_grade(self, line):
         '''Update a grade.'''
