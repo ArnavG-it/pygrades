@@ -222,11 +222,6 @@ class GradeTracker(cmd.Cmd):
         table = []
         assessments = self.courses[course]["assessments"]
 
-        total_weight = 0
-        total_ungraded_weight = 0
-        total_achieved = 0
-        weighted_average = 0
-
         for name, data in assessments.items():
             grades = data["grades"]
             kept, dropped = stats.filter_dropped(data)
@@ -271,8 +266,6 @@ class GradeTracker(cmd.Cmd):
             achieved = stats.achieved_weight(data)
             average = stats.interim_weight(kept)
 
-            total_ungraded_weight += graded / (len(grades) - to_drop) * weight
-
             achieved_str = f"{achieved:.2f} %"
             average_str = f"{average:.2f} %"
 
@@ -284,6 +277,7 @@ class GradeTracker(cmd.Cmd):
         # calculate and format totals
         total_achieved = stats.total_achieved(assessments)
         weighted_average = stats.total_weighted_average(assessments)
+        total_graded_weight = stats.total_graded_weight(assessments)
 
         total_achieved_letter = stats.get_letter_grade(self.courses[course], total_achieved)
         weighted_average_letter = stats.get_letter_grade(self.courses[course], weighted_average)
@@ -303,7 +297,7 @@ class GradeTracker(cmd.Cmd):
         # add last row to table
         table.append(["Total", "", weighted_average_str, total_achieved_str, "100 %"])
 
-        print(f"-- {course} Grades -- ({total_ungraded_weight:.1f}% complete)")
+        print(f"-- {course} Grades -- ({total_graded_weight:.1f}% complete)")
         print(tabulate(
             table,
             headers=["", "Grades", "Average", "Achieved", "Weight"],
