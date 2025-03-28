@@ -99,8 +99,9 @@ class GradeTracker(cmd.Cmd):
             number -= 1 
 
             if number not in range(0, max(1, len(grades))):
+                n = number
                 number, grade = None, None
-                raise CmdParseException(f"Invalid assessment number: {number + 1}")
+                raise CmdParseException(f"Invalid assessment number: {n + 1}")
             
         except CmdParseException as e:
             if str(e):
