@@ -8,6 +8,8 @@ from utils.constants import LETTER_GRADES, DATA_SCHEMA
 
 class OutlineParseError(Exception): pass
 
+class DataFileError(Exception): pass
+
 def setup_dirs():
     if not os.path.exists("outlines"):
         os.mkdir("outlines")
@@ -19,44 +21,58 @@ def filename_from_path(path) -> tuple[str, str]:
     [name, ext] = os.path.splitext(filename)
     return name, ext
 
-def validate_schema(data: dict) -> bool:
+def validate_schema(data: dict) -> DataFileError | None:
     try:
         jsonschema.validate(data, DATA_SCHEMA)
-        return True
+        return None
     except jsonschema.ValidationError as e:
-        print(e.message)
-        return False
+        return DataFileError(e)
     
-def validate_json(filepath) -> bool:
+def validate_json(filepath) -> DataFileError | None:
     with open(filepath, 'r') as f:
         try:
             d = json.load(f)
-            return True
+            return None
         except json.decoder.JSONDecodeError as e:
-            print(e)
-            return False
+            return DataFileError(e)
 
 def write_data(data, filename):
-    if not validate_schema(data):
-        print("\nERROR: Data is corrupted.")
+    error = validate_schema(data)
+    if error:
+        print("\nERROR: Data is corrupted:")
+        print(error)
         filename += "--corrupted"
-        print(f"Corrupted data will be written to {filename}.json")
 
     if ".json" not in filename:
         filename += ".json"
+
     filepath = os.path.join("data", filename)
+
+    if error:
+        # add copy number to name if multiple corrupted files
+        name, ext = filename_from_path(filepath)
+        copy_num = 1
+        while os.path.exists(filepath):
+            filename = f"{name} ({copy_num}){ext}"
+            filepath = os.path.join("data", filename)
+            copy_num += 1
+        print(f"Corrupted data will be written to {filepath}")
 
     with open(filepath, 'w') as f:
         json.dump(data, f, indent=2)
 
 def load_data(filepath) -> dict | None:
-    if not validate_json(filepath):
-        print("ERROR: Invalid JSON syntax in data file.")
+    error = validate_json(filepath)
+    if error:
+        print("ERROR: Invalid JSON syntax in data file:")
+        print(error)
         return None
     with open(filepath, 'r') as f:
         data = json.load(f)
-        if not validate_schema(data):
-            print("ERROR: Invalid schema in data file.")
+        error = validate_schema(data)
+        if error:
+            print("ERROR: Invalid schema in data file:")
+            print(error)
             return None
         return data
 

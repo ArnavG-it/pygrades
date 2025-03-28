@@ -206,7 +206,12 @@ class GradeTracker(cmd.Cmd):
                 else:
                     chosen_data = files.create_data(chosen_outline)
 
-        self.courses = files.load_data(chosen_data)
+        data = files.load_data(chosen_data)
+
+        if data is None:
+            raise SystemExit
+        
+        self.courses = data
 
         filename, _ = files.filename_from_path(chosen_data)
         self.filename = filename
@@ -389,7 +394,7 @@ class GradeTracker(cmd.Cmd):
 
     def do_exit(self, line):
         '''Exit the program.'''
-        print("Exiting...")
+        print("Saving and Exiting...")
         files.write_data(self.courses, self.filename)
         return True
     
