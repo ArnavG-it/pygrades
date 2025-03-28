@@ -242,7 +242,7 @@ class GradeTracker(cmd.Cmd):
             for grade in grades:
                 if grade is not None:
                     if grade in dropped_copy:
-                        grades_str += f"-{grade}-"
+                        grades_str += f"~{grade}~"
                         dropped_copy.remove(grade)
                     else:
                         grades_str += f"{grade}"
@@ -255,14 +255,16 @@ class GradeTracker(cmd.Cmd):
             to_drop = data["dropped"] - len(dropped)
 
             if ungraded > 0 or to_drop > 0:
+                pending_str = " pending"
+                dropped_str = (" more " if len(dropped) > 0 else " ") + "to drop"
                 grades_str += "\n" if len(grades) > 1 else " "
                 grades_str += "("
                 if ungraded and not to_drop:
-                    grades_str += f"{ungraded} not done"
+                    grades_str += f"{ungraded}{pending_str}"
                 elif to_drop and not ungraded:
-                    grades_str += f"{to_drop} to drop"
+                    grades_str += to_drop + dropped_str
                 else:
-                    grades_str += f"{ungraded} not done, {to_drop} to drop"
+                    grades_str += f"{ungraded}{pending_str}, {to_drop}{dropped_str}"
                 grades_str += ")"
 
             # calculate and format assessment stats
@@ -271,8 +273,8 @@ class GradeTracker(cmd.Cmd):
             achieved = stats.achieved_weight(data)
             average = stats.interim_weight(kept)
 
-            achieved_str = f"{achieved:.2f} %"
-            average_str = f"{average:.2f} %"
+            achieved_str = f"{achieved:.2f} %" if graded else "n/a"
+            average_str = f"{average:.2f} %" if graded else "n/a"
 
             weight_str = f"{weight} %"
 
