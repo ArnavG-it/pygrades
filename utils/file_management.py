@@ -1,9 +1,10 @@
 import os
 import glob
 import json
+from jsonschema import validate, ValidationError
 
 from utils import io
-from utils.constants import LETTER_GRADES
+from utils.constants import LETTER_GRADES, DATA_SCHEMA
 
 class OutlineParseError(Exception): pass
 
@@ -27,8 +28,15 @@ def write_data(data, filename):
 
 def load_data(filepath) -> dict:
     with open(filepath, 'r') as f:
-        return json.load(f)
-    
+        try:
+            data = json.load(f)
+            validate(data, DATA_SCHEMA)
+        except ValidationError as e:
+            print(e.message)
+        except json.decoder.JSONDecodeError as e:
+            print(e)
+        return data
+
 def select_outline() -> str | None:
     '''
     Finds an outline file (with help from the user, if needed).
