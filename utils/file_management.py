@@ -1,7 +1,7 @@
 import os
 import glob
 import json
-from jsonschema import validate, ValidationError
+import jsonschema
 
 from utils import io
 from utils.constants import LETTER_GRADES, DATA_SCHEMA
@@ -19,22 +19,45 @@ def filename_from_path(path) -> tuple[str, str]:
     [name, ext] = os.path.splitext(filename)
     return name, ext
 
+def validate_schema(data: dict) -> bool:
+    try:
+        jsonschema.validate(data, DATA_SCHEMA)
+        return True
+    except jsonschema.ValidationError as e:
+        print(e.message)
+        return False
+    
+def validate_json(filepath) -> bool:
+    with open(filepath, 'r') as f:
+        try:
+            d = json.load(f)
+            return True
+        except json.decoder.JSONDecodeError as e:
+            print(e)
+            return False
+
 def write_data(data, filename):
+    if not validate_schema(data):
+        print("\nERROR: Data is corrupted.")
+        filename += "--corrupted"
+        print(f"Corrupted data will be written to {filename}.json")
+
     if ".json" not in filename:
         filename += ".json"
     filepath = os.path.join("data", filename)
+
     with open(filepath, 'w') as f:
         json.dump(data, f, indent=2)
 
-def load_data(filepath) -> dict:
+def load_data(filepath) -> dict | None:
+    if not validate_json(filepath):
+        print("ERROR: Invalid JSON syntax in data file.")
+        return None
     with open(filepath, 'r') as f:
-        try:
-            data = json.load(f)
-            validate(data, DATA_SCHEMA)
-        except ValidationError as e:
-            print(e.message)
-        except json.decoder.JSONDecodeError as e:
-            print(e)
+        data = json.load(f)
+        if not validate_schema(data):
+            print("ERROR: Invalid schema in data file.")
+            return None
         return data
 
 def select_outline() -> str | None:
@@ -73,6 +96,7 @@ def select_data() -> str | None:
     Returns the filepath, if found.
     '''
     data_filepaths = glob.glob("data/*.json")
+    data_filepaths = list(filter(lambda f: "corrupted" not in f, data_filepaths))
     data_filenames = [os.path.basename(f) for f in data_filepaths]
 
     if len(data_filenames) == 0:
