@@ -151,12 +151,18 @@ class GradeTracker(cmd.Cmd):
             message = "Please select an assessment: ",
             repeat_message = "Invalid choice. Please select an assessment: ",
             func = lambda c:
-                io.in_range(c, 1, len(assessments) + 1)
+                c is not None and (
+                    io.in_range(c, 1, len(assessments) + 1)
+                    or c.lower().capitalize() in assessments.keys()
+                )
         )
 
         io.clear_lines(len(assessments) + 2)
 
-        assessment = list(assessments.keys())[int(choice) - 1]
+        if type(choice) == int:
+            assessment = list(assessments.keys())[int(choice) - 1]
+        else: # key str
+            assessment = choice.lower().capitalize()
 
         return assessment
     
