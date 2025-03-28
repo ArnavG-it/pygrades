@@ -133,10 +133,13 @@ class GradeTracker(cmd.Cmd):
         def suffix(assessment):
             s = ""
             grades = assessments[assessment]["grades"]
+            filtered_grades = stats.filter_ungraded(grades)
             if len(grades) > 1:
-                s += f" ({len(grades)} total)"
-            else:
+                s += f" ({len(filtered_grades)}/{len(grades)} graded)"
+            elif grades[0] is not None:
                 s += f" ({grades[0]}%)"
+            else:
+                s += " (pending)"
             return s
         
         print(io.numbered_list(
@@ -257,7 +260,7 @@ class GradeTracker(cmd.Cmd):
             if ungraded > 0 or to_drop > 0:
                 pending_str = " pending"
                 dropped_str = (" more " if len(dropped) > 0 else " ") + "to drop"
-                grades_str += "\n" if len(grades) > 1 else " "
+                grades_str += "\n" if len(grades) > 1 else ""
                 grades_str += "("
                 if ungraded and not to_drop:
                     grades_str += f"{ungraded}{pending_str}"
@@ -284,7 +287,6 @@ class GradeTracker(cmd.Cmd):
         # calculate and format totals
         total_achieved = stats.total_achieved(assessments)
         weighted_average = stats.total_weighted_average(assessments)
-        total_graded_weight = stats.total_graded_weight(assessments)
 
         total_achieved_letter = stats.get_letter_grade(self.courses[course], total_achieved)
         weighted_average_letter = stats.get_letter_grade(self.courses[course], weighted_average)
@@ -302,12 +304,11 @@ class GradeTracker(cmd.Cmd):
         weighted_average_str += f"{weighted_average:.2f} %"
         
         # add last row to table
-        table.append(["Total", "", weighted_average_str, total_achieved_str, "100 %"])
+        table.append(["•", "Weighted Totals:", weighted_average_str, total_achieved_str, "100 %"])
 
-        print(f"-- {course} Grades -- ({total_graded_weight:.1f}% complete)")
         print(tabulate(
             table,
-            headers=["", "Grades", "Average", "Achieved", "Weight"],
+            headers=[f"{course}", "Grades", "Average", "Achieved", "Weight"],
             tablefmt="rounded_grid",
             stralign="right",
             colalign=("right", "left",)
@@ -336,10 +337,11 @@ class GradeTracker(cmd.Cmd):
                 f"Enter the grade for {assessment_str}: ",
                 func = lambda c:
                     # abitrary upper bound for bonus marks
-                    io.in_range(c, 0, 1000)
+                    c is not None and io.in_range(c.replace("%", ""), 0, 1000)
             )
+            new_grade = new_grade.replace("%", "")
             io.clear_lines(1)
-        
+
         current_grade = grades[num]
 
         if current_grade is not None:
