@@ -1,5 +1,3 @@
-from utils.constants import LETTER_GRADES
-
 def achieved_weight(assessment: dict):
     '''Returns the achieved weight of the assessment, in percent.'''
     weight = int(assessment["weight"])

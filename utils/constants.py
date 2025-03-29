@@ -1,5 +1,3 @@
-LETTER_GRADES = ["A+", "A", "B+", "B", "C+", "C", "D+", "D", "F"]
-
 DATA_SCHEMA = {
     "type": "object",
     "additionalProperties": {

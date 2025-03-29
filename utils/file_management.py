@@ -4,7 +4,7 @@ import json
 import jsonschema
 
 from utils import io
-from utils.constants import LETTER_GRADES, DATA_SCHEMA
+from utils.constants import DATA_SCHEMA
 
 class OutlineParseError(Exception): pass
 
@@ -250,6 +250,7 @@ def select_data() -> str | None:
 def create_data(outline_filename) -> str | None:
     '''
     Creates a data file based on an outline.
+    Will raise SystemExit if the outline is invalid.
     Returns the filepath of the created file.
     '''
     filename_without_extension = os.path.splitext(outline_filename)[0]
@@ -274,14 +275,22 @@ def create_data(outline_filename) -> str | None:
             return None
 
     course_data = parse_outline(outline_filename)
-
+    
+    if course_data is None:
+        print("Please see the README for help creating an outline.")
+        raise SystemExit
+    
     write_data(course_data, data_filename)
 
     return os.path.join("data", data_filename)
 
-def parse_outline(filename) -> dict:
-    '''Parses an outline file into a dictionary of courses.'''
+def parse_outline(filename) -> dict | None:
+    '''
+    Parses an outline file into a dictionary of courses.
+    Returns None if the outline is invalid.
+    '''
     courses = {}
+    error = False
     with open(os.path.join("outlines", filename), "r") as f:
         current_course = None
         line_num = 0
@@ -301,29 +310,29 @@ def parse_outline(filename) -> dict:
                     # Add a grade item
                     try:
                         parts = line.split()
-                        if len(parts) != 3:
-                            raise OutlineParseError()
                         
-                        amount, name, weight = parts[0], parts[1], parts[2]
+                        if len(parts) == 3:
+                            amount, name, weight = parts[0], parts[1], parts[2]
+                            drop, dropped = "", 0
+                        elif len(parts) == 5:
+                            amount, drop, dropped, name, weight = (
+                                parts[0], parts[1], parts[2], parts[3], parts[4]
+                            )
+                        else:
+                            raise OutlineParseError(f"Invalid assessment syntax: '{line}'")
 
-                        if amount.isnumeric():
+                        try:
                             amount = int(amount)
-                            dropped = 0
-                        elif 'd' in amount:
-                            parts = amount.split('d')
-                            total, dropped = parts[0], parts[1]
-                            if not (
-                                total.isnumeric() and dropped.isnumeric()
-                                and int(dropped) < int(total)
-                            ):
-                                raise OutlineParseError()
-                            amount = int(total)
                             dropped = int(dropped)
+                            if len(parts) == 5 and drop != "drop":
+                                raise OutlineParseError(f"Invalid assessment syntax: '{line}'")
+                        except ValueError:
+                            raise OutlineParseError(f"Non-numeric values: '{line}'")
 
                         if weight[-1] == '%' and weight[:-1].isnumeric():
                             weight = int(weight[:-1])
                         else:
-                            raise OutlineParseError()
+                            raise OutlineParseError(f"Invalid weight: '{line}'")
 
                         courses[current_course]["assessments"][name] = {
                             "weight": weight,
@@ -332,22 +341,23 @@ def parse_outline(filename) -> dict:
                             "grades": [None] * amount
                         }
                     except OutlineParseError as e:
-                        print(f"Error parsing line {line_num}, '{line}'")
+                        print(f"Error at line {line_num}:")
+                        print(e)
+                        error = True
 
                 elif line[0] in "ABCDEF" and current_course:
                     # Add to the grade scale
                     try:
                         parts = line.split()
                         if len(parts) != 2:
-                            raise OutlineParseError()
+                            raise OutlineParseError(f"Invalid letter grade: '{line}'")
                         
                         letter, minimum = parts[0], int(parts[1])
 
-                        if letter not in LETTER_GRADES or minimum > 100:
-                            raise OutlineParseError()
-
                         courses[current_course]["scale"][letter] = minimum
                     except OutlineParseError as e:
-                        print(f"Error parsing line {line_num}, '{line}'")
+                        print(f"Error at line {line_num}:")
+                        print(e)
+                        error = True
 
-    return courses
+    return courses if not error else None
