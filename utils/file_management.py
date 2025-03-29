@@ -53,10 +53,11 @@ def validate_json(filepath) -> DataFileError | None:
         except json.decoder.JSONDecodeError as e:
             return DataFileError(e)
 
-def write_data(data, filename):
+def write_data(data, filename) -> bool:
     '''
-    Writes data to data/filename.json and backs up old data.
-    If data is corrupted, writes to data/corrupt/filename.json
+    Writes to data/ and backs up old data.
+    If data is corrupted, writes to data/corrupt/.
+    Returns true if successful.
     '''
     path = "data"
 
@@ -94,6 +95,8 @@ def write_data(data, filename):
 
     with open(filepath, 'w') as f:
         json.dump(data, f, indent=4)
+
+    return error is None
 
 def load_data(filepath) -> dict | None:
     data = {}

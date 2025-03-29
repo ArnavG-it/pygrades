@@ -392,6 +392,13 @@ class GradeTracker(cmd.Cmd):
 
         for row in rows: print(row)
 
+    def do_save(self, line):
+        success = files.write_data(self.courses, self.filename)
+        if success:
+            print("Saved changes.")
+        else:
+            raise SystemExit
+
     def do_exit(self, line):
         '''Exit the program.'''
         print("Saving and Exiting...")
