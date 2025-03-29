@@ -13,13 +13,30 @@ class DataFileError(Exception): pass
 def setup_dirs():
     if not os.path.exists("outlines"):
         os.mkdir("outlines")
+
     if not os.path.exists("data"):
         os.mkdir("data")
+
+    backup_path = os.path.join("data", "backup")
+    if not os.path.exists(backup_path):
+        os.mkdir(backup_path)
+        
+    corrupt_path = os.path.join("data", "corrupt")
+    if not os.path.exists(corrupt_path):
+        os.mkdir(corrupt_path)
 
 def filename_from_path(path) -> tuple[str, str]:
     filename = os.path.basename(path)
     [name, ext] = os.path.splitext(filename)
     return name, ext
+
+def get_unique_filepath(path, name, ext) -> str:
+    count = 1
+    filepath = os.path.join(path, f"{name}{ext}")
+    while os.path.exists(filepath):
+        filepath = os.path.join(path, f"{name}({count}){ext}")
+        count += 1
+    return filepath
 
 def validate_schema(data: dict) -> DataFileError | None:
     try:
@@ -37,45 +54,119 @@ def validate_json(filepath) -> DataFileError | None:
             return DataFileError(e)
 
 def write_data(data, filename):
+    '''
+    Writes data to data/filename.json and backs up old data.
+    If data is corrupted, writes to data/corrupt/filename.json
+    '''
+    path = "data"
+
+    # backup existing data
+    existing_filepath = os.path.join(path, filename) + ".json"
+    if os.path.exists(existing_filepath):
+        with open(existing_filepath, 'r') as f:
+            backup_data = json.load(f)
+        backup_path = os.path.join(path, "backup")
+        backup_filepath = os.path.join(backup_path, f"{filename}(backup).json")
+        with open(backup_filepath, 'w') as f:
+            json.dump(backup_data, f, indent=4)
+
+    # check for corrupted data
     error = validate_schema(data)
     if error:
-        print("\nERROR: Data is corrupted:")
+        print("\nERROR: Data is corrupted:\n")
         print(error)
-        filename += "--corrupted"
+        print()
+        # prepare corrupted file to be written
+        path = os.path.join(path, "corrupt")
+        filename += "(corrupted)"
 
     if ".json" not in filename:
         filename += ".json"
 
-    filepath = os.path.join("data", filename)
+    filepath = os.path.join(path, filename)
 
     if error:
-        # add copy number to name if multiple corrupted files
+        # further prepare corrupted file
         name, ext = filename_from_path(filepath)
-        copy_num = 1
-        while os.path.exists(filepath):
-            filename = f"{name} ({copy_num}){ext}"
-            filepath = os.path.join("data", filename)
-            copy_num += 1
-        print(f"Corrupted data will be written to {filepath}")
+        filepath = get_unique_filepath(path, name, ext)
+        print(f"NOTICE: Corrupted data will be written to {filepath}")
+        print(f"NOTICE: No changes to {existing_filepath} were saved.")
 
     with open(filepath, 'w') as f:
-        json.dump(data, f, indent=2)
+        json.dump(data, f, indent=4)
 
 def load_data(filepath) -> dict | None:
-    error = validate_json(filepath)
-    if error:
-        print("ERROR: Invalid JSON syntax in data file:")
-        print(error)
-        return None
+    data = {}
+
+    # check for invalid JSON
+    json_error = validate_json(filepath)
+    if json_error:
+        print("\nERROR: Invalid JSON syntax in data file:\n")
+        print(json_error)
+        print()
+        continue_with_backup = handle_corrupted_load(filepath)
+        if not continue_with_backup:
+            return None
+
     with open(filepath, 'r') as f:
         data = json.load(f)
-        error = validate_schema(data)
-        if error:
-            print("ERROR: Invalid schema in data file:")
-            print(error)
-            return None
-        return data
 
+    # check for invalid data
+    schema_error = validate_schema(data)
+    if schema_error:
+        print("\nERROR: Invalid schema in data file:\n")
+        print(schema_error)
+        print()
+        cont = handle_corrupted_load(filepath)
+        if cont:
+            # continue with backup data if requested
+            data = load_data(filepath)
+        else:
+            return None
+    
+    return data
+
+def handle_corrupted_load(filepath) -> bool:
+    '''
+    Assumes the given filepath is corrupted.
+    Creates a known corrupted version of the file,
+    and tries to restore from backup.
+
+    Returns whether there was a backup and the user
+    wishes to continue with it.
+    '''
+    print()
+    name, ext= filename_from_path(filepath)
+
+    # write existing file to data/corrupt
+    path = os.path.join("data", "corrupt")
+    corrupt_filepath = get_unique_filepath(path, name + "(corrupt)", ext)
+    os.rename(filepath, corrupt_filepath)
+
+    print(f"NOTICE: Moved {filepath} to {corrupt_filepath}")
+
+    # write backup to filepath
+    backup_path = os.path.join("data", "backup")
+    backup_filepath = os.path.join(backup_path, f"{name}(backup).json")
+    if os.path.exists(backup_filepath):
+        backup = {}
+        with open(backup_filepath, 'r') as f:
+            backup = json.load(f)
+        write_data(backup, name)
+
+        print(f"NOTICE: Restored data from backup.\n")
+
+        cont = io.input_until_valid(
+            "Continue with backup data? (y/n) ",
+            lambda c: io.yes_or_no(c)
+        )
+
+        return cont == 'y'
+
+    else:
+        print("NOTICE: No backup data found. Quitting the program...")
+        return False
+    
 def select_outline() -> str | None:
     '''
     Finds an outline file (with help from the user, if needed).
