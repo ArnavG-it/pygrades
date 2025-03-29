@@ -22,33 +22,72 @@ class GradeTracker(cmd.Cmd):
 
     """Helper Functions"""
 
+    def match_course(self, line: str):
+        '''
+        Tries to match a course by its name or code.
+
+        Returns the course if found, and the line
+        with the course identifier removed.
+        '''
+        if not line:
+            return None, line
+        
+        # match course by name or code
+        matches = []
+        for c in self.courses:
+            name, code = c.lower().split()
+            if name in line or code in line:
+                if name and code in line:
+                    matches = [c]
+                    break
+                else:
+                    matches.append(c)
+                
+        if len(matches) == 1:
+            course = matches[0]
+            name, code = course.lower().split()
+            # remove identifiers from line
+            line = line.replace(name, "").strip()
+            line = line.replace(code, "").strip()
+
+        else:
+            course = None
+        
+        return course, line
+    
+    def match_grade(self, grade: str | float, course: str = "") -> float | None:
+        '''
+        Checks whether the grade is valid as a
+        percentage or a scale key from the given course.
+
+        Returns the grade as a percentage if valid.
+        '''
+        # try as percentage
+        try:
+            grade_f = float(grade)
+            return grade_f if 0 < grade_f <= 100 else None
+        except ValueError:
+            pass
+
+        # try as scale key
+        if course in self.courses.keys():
+            scale = self.courses[course]["scale"]
+            scale_lower = {
+                key.lower(): val for key, val in scale.items()
+            }
+            grade = grade.lower()
+            if grade in scale_lower.keys():
+                return scale_lower[grade]
+        
+        return None
+
     def parse_grade(self, line: str) -> tuple[str, str, int, int]:
         course, assessment, number, grade = None, None, None, None
         try:
-            if not line:
-                raise CmdParseException()
+            course, line = self.match_course(line)
+            if not course:
+                raise CmdParseException("No valid course provided.")
             
-            # match course by name or code
-            matches = []
-            for c in self.courses:
-                name, code = c.lower().split()
-                if name in line or code in line:
-                    if name and code in line:
-                        matches = [c]
-                        break
-                    else:
-                        matches.append(c)
-                    
-            if len(matches) == 1:
-                course = matches[0]
-                name, code = course.lower().split()
-                # remove identifiers from line
-                line = line.replace(name, "").strip()
-                line = line.replace(code, "").strip()
-
-            else:
-                raise CmdParseException("No valid course specified.")
-
             # match assessment
             assessment = None
             assessments = self.courses[course]["assessments"]
@@ -107,8 +146,28 @@ class GradeTracker(cmd.Cmd):
             if str(e):
                 print(e)
 
-        finally:
-            return course, assessment, number, grade
+        return course, assessment, number, grade
+        
+    def parse_needed(self, line) -> tuple[str, float]:
+        course, target = None, None
+        try:
+            if not line:
+                raise CmdParseException()
+
+            course, line = self.match_course(line)
+            if not course:
+                raise CmdParseException(f"No valid course provided.")
+
+            target = self.match_grade(line, course)
+            
+            if not target:
+                raise CmdParseException(f"No valid target grade provided.")
+
+        except CmdParseException as e:
+            if str(e):
+                print(e)
+
+        return course, target
 
     def select_course(self, allow_all = False) -> str | None:
         print(io.numbered_list(self.courses))
@@ -232,10 +291,57 @@ class GradeTracker(cmd.Cmd):
         print()
         if stop:
             return True
-    
+
+    def do_grade(self, line):
+        '''Update a grade.'''
+        course, assessment, num, new_grade = self.parse_grade(line)
+        
+        if not course:
+            course = self.select_course()
+
+        if not assessment:
+            print(f"Assessments for {course}:")
+            assessment = self.select_assessment(course)
+
+        grades = self.courses[course]["assessments"][assessment]["grades"]
+
+        if num is None:
+            num = self.select_assessment_number(course, assessment)
+
+        assessment_str = assessment + (f" {num + 1}" if len(grades) > 1 else "")
+
+        if new_grade is None:
+            new_grade = io.input_until_valid(
+                f"Enter the grade for {assessment_str}: ",
+                func = lambda c:
+                    # abitrary upper bound for bonus marks
+                    c is not None and io.in_range(c.replace("%", ""), 0, 1000)
+            )
+            new_grade = new_grade.replace("%", "")
+            io.clear_lines(1)
+
+        current_grade = grades[num]
+
+        if current_grade is not None:
+            choice = io.input_until_valid(
+                message = (
+                    assessment_str +
+                    f" already has the grade {current_grade}. Overwrite it with {new_grade}? (y/n) "
+                ),
+                func = lambda c:
+                    io.yes_or_no(c)
+            )
+            io.clear_lines(1)
+            if choice == 'n':
+                print("Cancelled updating grade.")
+                return
+            
+        grades[num] = int(new_grade)
+        print(f"Updated {course} {assessment_str} to {new_grade}%.")
+
     def do_summary(self, line):
         '''Summarize grades for a course.'''
-        course, _, _, _ = self.parse_grade(line)
+        course, _ = self.match_course(line)
         if not course:
             course = self.select_course()
 
@@ -326,53 +432,6 @@ class GradeTracker(cmd.Cmd):
             colalign=("right", "left",)
         ))
 
-    def do_grade(self, line):
-        '''Update a grade.'''
-        course, assessment, num, new_grade = self.parse_grade(line)
-        
-        if not course:
-            course = self.select_course()
-
-        if not assessment:
-            print(f"Assessments for {course}:")
-            assessment = self.select_assessment(course)
-
-        grades = self.courses[course]["assessments"][assessment]["grades"]
-
-        if num is None:
-            num = self.select_assessment_number(course, assessment)
-
-        assessment_str = assessment + (f" {num + 1}" if len(grades) > 1 else "")
-
-        if new_grade is None:
-            new_grade = io.input_until_valid(
-                f"Enter the grade for {assessment_str}: ",
-                func = lambda c:
-                    # abitrary upper bound for bonus marks
-                    c is not None and io.in_range(c.replace("%", ""), 0, 1000)
-            )
-            new_grade = new_grade.replace("%", "")
-            io.clear_lines(1)
-
-        current_grade = grades[num]
-
-        if current_grade is not None:
-            choice = io.input_until_valid(
-                message = (
-                    assessment_str +
-                    f" already has the grade {current_grade}. Overwrite it with {new_grade}? (y/n) "
-                ),
-                func = lambda c:
-                    io.yes_or_no(c)
-            )
-            io.clear_lines(1)
-            if choice == 'n':
-                print("Cancelled updating grade.")
-                return
-            
-        grades[num] = int(new_grade)
-        print(f"Updated {course} {assessment_str} to {new_grade}%.")
-
     def do_scale(self, line):
         '''Prints the letter grade scale of a course.'''
         course_name, _, _, _ = self.parse_grade(line)
@@ -387,10 +446,42 @@ class GradeTracker(cmd.Cmd):
         rows = [f"-- {course_name} Scale --"]
         for letter, minimum in scale.items():
             rows.append(f"{letter}\t{minimum}%")
-            if letter == placement:
+            if placement is not None and letter == placement:
                 rows[-1] += f" <- Current ({weighted_avg:.2f}%)"
 
         for row in rows: print(row)
+
+    def do_needed(self, line):
+        course_name, target = self.parse_needed(line)
+        if not course_name:
+            course_name = self.select_course()
+
+        if target is None or not self.match_grade(target, course_name):
+            target = io.input_until_valid(
+                "Enter a target grade: ",
+                lambda c: c is not None and self.match_grade(c, course_name)
+            )
+            target = self.match_grade(target, course_name)
+
+        course = self.courses[course_name]
+        assessments = course["assessments"]
+        scale = course["scale"]
+
+        needed = stats.needed_for_target(assessments, target)
+        
+        target_str = f"{target:.1f}%"
+        scale_key = stats.get_letter_grade(course, target)
+        if scale_key is not None and scale[scale_key] == target:
+            target_str += f" ({scale_key})"
+
+        if needed is None:
+            print(f"All assessments in {course_name} have already been graded.")
+        elif needed > 100:
+            print(f"Cannot achieve {target_str} in {course_name}.")
+        elif needed <= 0:
+            print(f"You have already achieved {target_str}% in {course_name}.")
+        else:
+            print(f"{needed:.2f}% needed on remaining assessments to achieve {target_str}.")
 
     def do_save(self, line):
         success = files.write_data(self.courses, self.filename)

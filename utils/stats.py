@@ -50,7 +50,7 @@ def total_weighted_average(assessments: dict):
         weight = data["weight"]
         kept, _ = filter_dropped(data)
         total += interim_weight(kept) * weight / 100
-        if interim_weight(kept) > 0:
+        if len(filter_ungraded(kept)) > 0:
             completed_weight += data["weight"]
 
     if completed_weight > 0:
@@ -66,6 +66,39 @@ def total_achieved(assessments: dict):
         * total_graded_weight(assessments)
         / 100
     )
+
+def needed_for_target(assessments: dict, target_grade) -> float | None:
+    '''
+    Returns the average needed on each remaining grade
+    to achieve the target grade.
+    Returns None if no ungraded assessments remain.
+    '''
+    achieved_weighted_sum = 0
+    remaining_fraction_sum = 0
+
+    for _name, a in assessments.items():
+        # calculate number of ungraded assessments
+        kept, dropped = filter_dropped(a)
+        to_keep = a["amount"] - a["dropped"]
+        completed_grades = filter_ungraded(kept)
+        incomplete = to_keep - len(completed_grades)
+
+        # handle potential grades that could be dropped
+        to_drop = a["dropped"] - len(dropped)
+        if incomplete == 0:
+            incomplete += to_drop
+
+        # accumulate sums
+        weight = a["weight"]
+        achieved_weighted_sum += achieved_weight(a) * 100
+        remaining_fraction_sum += incomplete / to_keep * weight
+
+    if remaining_fraction_sum == 0:
+        return None
+    
+    x = (target_grade * 100 - achieved_weighted_sum) / remaining_fraction_sum
+
+    return x
 
 def filter_dropped(assessment: dict, maximize = True) -> tuple[list, list]:
     '''
@@ -100,7 +133,7 @@ def filter_dropped(assessment: dict, maximize = True) -> tuple[list, list]:
 
 def get_letter_grade(course: dict, grade: float):
     scale = course["scale"].items()
-    letter_grade = ""
+    letter_grade = None
     maximum = 0
     for letter, value in scale:
         if grade >= value and value > maximum:
