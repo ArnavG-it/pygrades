@@ -160,7 +160,7 @@ class GradeTracker(cmd.Cmd):
 
         io.clear_lines(len(assessments) + 2)
 
-        if type(choice) == int:
+        if choice.isnumeric():
             assessment = list(assessments.keys())[int(choice) - 1]
         else: # key str
             assessment = choice.lower().capitalize()
