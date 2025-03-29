@@ -132,7 +132,7 @@ class GradeTracker(cmd.Cmd):
                     number = int(number)
                 if grade:
                     grade = grade.replace('%', "")
-                    grade = int(grade)
+                    grade = float(grade)
             except ValueError:
                 number, grade = None, None
                 raise CmdParseException(f"Unknown syntax: {" ".join(line)}")
@@ -338,7 +338,7 @@ class GradeTracker(cmd.Cmd):
                 print("Cancelled updating grade.")
                 return
             
-        grades[num] = int(new_grade)
+        grades[num] = float(new_grade)
         print(f"Updated {course} {assessment_str} to {new_grade}%.")
 
     def do_summary(self, line):
@@ -364,12 +364,16 @@ class GradeTracker(cmd.Cmd):
             i = 1
             for grade in grades:
                 if grade is not None:
+                    fraction = grade != int(grade)
+                    grade_str = f"{grade:.1f}" if fraction else f"{grade:.0f}"
+
                     if grade in dropped_copy:
-                        grades_str += f"~{grade}~"
+                        grades_str += f"~{grade_str}~"
                         dropped_copy.remove(grade)
                     else:
-                        grades_str += f"{grade}"
+                        grades_str += f"{grade_str}"
                         kept_copy.remove(grade)
+
                     if i != graded:
                         grades_str += ", "
                 i += 1
@@ -436,7 +440,7 @@ class GradeTracker(cmd.Cmd):
 
     def do_scale(self, line):
         '''Prints the letter grade scale of a course.'''
-        course_name, _, _, _ = self.parse_grade(line)
+        course_name, _ = self.match_course(line)
         if not course_name:
             course_name = self.select_course()
         course = self.courses[course_name]
