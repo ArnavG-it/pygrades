@@ -64,6 +64,8 @@ class GradeTracker(cmd.Cmd):
         '''
         # try as percentage
         try:
+            if type(grade) == str:
+                grade = grade.replace("%", "")
             grade_f = float(grade)
             return grade_f if 0 < grade_f <= 100 else None
         except ValueError:
@@ -491,10 +493,22 @@ class GradeTracker(cmd.Cmd):
             raise SystemExit
 
     def do_exit(self, line):
-        '''Exit the program.'''
+        '''Save and exit the program.'''
         print("Saving and Exiting...")
         files.write_data(self.courses, self.filename)
         return True
+    
+    def do_quit(self, line):
+        '''Quit without saving.'''
+        conf = io.input_until_valid(
+            "Are you sure you want to quit without saving? (y/n) ",
+            lambda c: io.yes_or_no(c)
+        )
+        if conf != 'y':
+            print("You can save and exit by typing 'exit'.")
+        else:
+            print("Quitting...")
+            return True
     
     def customloop(self):
         '''cmdloop wrapper to gracefully exit on KeyboardInterrupt.'''
