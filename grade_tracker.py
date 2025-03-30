@@ -84,10 +84,20 @@ class GradeTracker(cmd.Cmd):
                 f"Enter the grade for {assessment_str}: ",
                 func = lambda c:
                     # abitrary upper bound for bonus marks
-                    c is not None and io.in_range(c.replace("%", ""), 0, 1000)
+                    c is not None and (
+                        io.in_range(c.replace("%", ""), 0, 1000)
+                        or c.lower() == "none"
+                    )
             )
-            new_grade = new_grade.replace("%", "")
+            if new_grade.lower() == "none":
+                new_grade = -1
+            else:
+                new_grade = new_grade.replace("%", "")
             io.clear_lines(1)
+
+        # resolve sentinel value grade to None
+        if new_grade == -1:
+            new_grade = None
 
         current_grade = grades[num]
 
@@ -104,9 +114,12 @@ class GradeTracker(cmd.Cmd):
             if choice == 'n':
                 print("Cancelled updating grade.")
                 return
-            
-        grades[num] = float(new_grade)
-        print(f"Updated {course} {assessment_str} to {new_grade}%.")
+        
+        if new_grade is not None:
+            grades[num] = float(new_grade)
+        else:
+            grades[num] = None
+        print(f"Updated {course} {assessment_str} to {new_grade}{'%' * (new_grade is not None)}.")
 
     def do_summary(self, line):
         '''Summarize grades for a course.'''
@@ -382,6 +395,10 @@ class GradeTracker(cmd.Cmd):
         return None
 
     def parse_grade(self, line: str) -> tuple[str, str, int, int]:
+        '''
+        Parses all arguments for do_grade.
+        If grade is -1, the user wishes to unset it.
+        '''
         course, assessment, number, grade = None, None, None, None
         try:
             course, line = self.match_course(line)
@@ -429,8 +446,11 @@ class GradeTracker(cmd.Cmd):
                 if number:
                     number = int(number)
                 if grade:
-                    grade = grade.replace('%', "")
-                    grade = float(grade)
+                    if grade.lower() == "none":
+                        grade = -1
+                    else:
+                        grade = grade.replace('%', "")
+                        grade = float(grade)
             except ValueError:
                 number, grade = None, None
                 raise CmdParseException(f"Unknown syntax: {" ".join(line)}")
