@@ -501,14 +501,14 @@ class GradeTracker(cmd.Cmd):
     # Numbered List Selectors #
     # ======================= #
 
-    def select_course(self, allow_all = False) -> str | None:
+    def select_course(self) -> str | None:
         print(io.numbered_list(self.courses))
-        message = "Please select a course" + (allow_all * " (0 for all)") + ": "
+        message = "Please select a course: "
         choice = io.input_until_valid(
             message = message,
             repeat_message = "Invalid choice. " + message,
             func = lambda c:
-                io.in_range(c, int(not allow_all), len(self.courses) + 1)
+                io.in_range(c, 1, len(self.courses) + 1)
         )
 
         io.clear_lines(len(self.courses) + 2)
