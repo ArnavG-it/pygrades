@@ -139,7 +139,7 @@ class GradeTracker(cmd.Cmd):
 
             # find the index of the last grade that is not None
             rev_grades = grades[::-1]
-            last_grade = next((i for i, g in enumerate(rev_grades) if g is not None), -1)
+            last_grade = next((i for i, g in enumerate(rev_grades) if g is not None), len(grades))
             latest_grade = len(grades) - last_grade - 1
 
             # copies for iterative mutation
@@ -147,10 +147,7 @@ class GradeTracker(cmd.Cmd):
             dropped_copy = dropped[:]
 
             # create formatted strings for grades column
-            if 0 < latest_grade < len(grades) - 1:
-                grades_str = "None, " * latest_grade
-            else:
-                grades_str = ""
+            grades_str = ""
             i = 0
             for grade in grades:
                 if grade is not None:
@@ -166,6 +163,10 @@ class GradeTracker(cmd.Cmd):
 
                     if i != latest_grade:
                         grades_str += ", "
+                
+                elif len(kept) > 0 <= i < latest_grade:
+                    grades_str += "None, "
+
                 i += 1
 
             ungraded = grades.count(None)
