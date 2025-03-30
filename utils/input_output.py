@@ -1,5 +1,10 @@
 from typing import Callable, Any
 
+def notify_and_exit(s: str = "Press Enter to exit."):
+    '''Raises SystemExit after notifying the user.'''
+    input(s)
+    raise SystemExit
+
 def input_until_valid(
     message,
     func: Callable[[str], bool],

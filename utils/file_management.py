@@ -59,14 +59,14 @@ def setup_cmd() -> tuple[dict, str]:
             chosen_outline = select_outline()
             if not chosen_outline:
                 print("No grade outline files were found. Please create one.")
-                raise SystemExit
+                io.notify_and_exit()
             else:
                 chosen_data = create_data(chosen_outline)
 
     data = load_data(chosen_data)
 
     if data is None:
-        raise SystemExit
+        io.notify_and_exit()
 
     filename, _ = filename_from_path(chosen_data)
 
@@ -262,7 +262,7 @@ def select_outline() -> str | None:
 
 def select_data() -> str | None:
     '''
-    Finds a data file to load, or goes to creation if none exist.
+    Finds a data file to load.
     Returns the filepath, if found.
     '''
     data_filepaths = glob.glob("data/*.json")
@@ -309,6 +309,7 @@ def create_data(outline_filename) -> str | None:
     Will raise SystemExit if the outline is invalid.
     Returns the filepath of the created file.
     '''
+    print(f"Creating data based on {outline_filename}...")
     filename_without_extension = os.path.splitext(outline_filename)[0]
 
     data_files = glob.glob("data/*.json")
@@ -332,13 +333,13 @@ def create_data(outline_filename) -> str | None:
     
     if course_data is None:
         print("Please see the README for help creating an outline.")
-        raise SystemExit
+        io.notify_and_exit()
     
     valid = validate_outline(course_data)
 
     if not valid:
         print("Please see the README for help creating an outline.")
-        raise SystemExit
+        io.notify_and_exit()
     
     write_data(course_data, data_filename)
 
