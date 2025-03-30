@@ -7,7 +7,9 @@ from utils import stats
 
 class CmdParseException(Exception): pass 
 
-SPLASH_MESSAGE = "Welcome to PyGradeTracker! Ctrl + C at any time to exit."
+SPLASH_MESSAGE = (
+    "Welcome to PyGradeTracker! Ctrl + C at any time to cancel a command or exit."
+)
 
 SPLASH = f"""
 |{'=' * (len(SPLASH_MESSAGE) + 2)}|
@@ -131,17 +133,25 @@ class GradeTracker(cmd.Cmd):
         assessments = self.courses[course]["assessments"]
 
         for name, data in assessments.items():
-            grades = data["grades"]
+            grades: list = data["grades"]
             kept, dropped = stats.filter_dropped(data)
             graded = len(stats.filter_ungraded(grades))
+
+            # find the index of the last grade that is not None
+            rev_grades = grades[::-1]
+            last_grade = next((i for i, g in enumerate(rev_grades) if g is not None), -1)
+            latest_grade = len(grades) - last_grade - 1
 
             # copies for iterative mutation
             kept_copy = kept[:]
             dropped_copy = dropped[:]
 
             # create formatted strings for grades column
-            grades_str = ""
-            i = 1
+            if 0 < latest_grade < len(grades) - 1:
+                grades_str = "None, " * latest_grade
+            else:
+                grades_str = ""
+            i = 0
             for grade in grades:
                 if grade is not None:
                     fraction = grade != int(grade)
@@ -154,7 +164,7 @@ class GradeTracker(cmd.Cmd):
                         grades_str += f"{grade_str}"
                         kept_copy.remove(grade)
 
-                    if i != graded:
+                    if i != latest_grade:
                         grades_str += ", "
                 i += 1
 
@@ -314,7 +324,8 @@ class GradeTracker(cmd.Cmd):
     def do_exit(self, line):
         '''Save and exit the program.'''
         print("Saving and Exiting...")
-        files.write_data(self.courses, self.filename)
+        if hasattr(self, "courses") and hasattr(self, "filename"):
+            files.write_data(self.courses, self.filename)
         return True
     
     def do_quit(self, line):
