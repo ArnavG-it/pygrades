@@ -1,5 +1,32 @@
 from copy import deepcopy
 
+def course_totals(course: dict) -> tuple[str, str]:
+    '''
+    Returns the total weighted average and achieved grades
+    of a course, formatted to be used in tables.
+    '''
+    assessments = course["assessments"]
+
+    achieved = total_achieved(assessments)
+    weighted_average = total_weighted_average(assessments)
+
+    achieved_letter = get_letter_grade(course, achieved)
+    weighted_average_letter = get_letter_grade(course, weighted_average)
+
+    achieved_str = ""
+    if achieved_letter:
+        achieved_str += f"({achieved_letter}) "
+
+    achieved_str += f"{achieved:.2f} %"
+
+    weighted_average_str = ""
+    if weighted_average_letter:
+        weighted_average_str += f"({weighted_average_letter}) "
+
+    weighted_average_str += f"{weighted_average:.2f} %"
+
+    return weighted_average_str, achieved_str
+
 def achieved_weight(assessment: dict):
     '''Returns the achieved weight of the assessment, in percent.'''
     weight = int(assessment["weight"])

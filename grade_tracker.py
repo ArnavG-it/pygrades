@@ -197,27 +197,9 @@ class GradeTracker(cmd.Cmd):
 
             # add row to table
             table.append([name, grades_str, average_str, achieved_str, weight_str])
-        
-        # calculate and format totals
-        total_achieved = stats.total_achieved(assessments)
-        weighted_average = stats.total_weighted_average(assessments)
 
-        total_achieved_letter = stats.get_letter_grade(self.courses[course], total_achieved)
-        weighted_average_letter = stats.get_letter_grade(self.courses[course], weighted_average)
-
-        total_achieved_str = ""
-        if total_achieved_letter:
-            total_achieved_str += f"({total_achieved_letter}) "
-
-        total_achieved_str += f"{total_achieved:.2f} %"
-
-        weighted_average_str = ""
-        if weighted_average_letter:
-            weighted_average_str += f"({weighted_average_letter}) "
-
-        weighted_average_str += f"{weighted_average:.2f} %"
-        
-        # add last row to table
+        # add totals to table
+        weighted_average_str, total_achieved_str = stats.course_totals(self.courses[course])
         table.append(["•", "Weighted Totals:", weighted_average_str, total_achieved_str, "100 %"])
 
         print(tabulate(
@@ -226,6 +208,21 @@ class GradeTracker(cmd.Cmd):
             tablefmt="rounded_grid",
             stralign="right",
             colalign=("right", "left",)
+        ))
+
+    def do_overview(self, line):
+        '''View the status of each course.'''
+        table = []
+        for name, data in self.courses.items():
+            weighted_average_str, total_achieved_str = stats.course_totals(data)
+
+            table.append([name, weighted_average_str, total_achieved_str])
+
+        print(tabulate(
+            table,
+            headers=[self.filename, "Wtd. Average", "Achieved"],
+            tablefmt = "rounded_grid",
+            stralign="right"
         ))
 
     def do_scale(self, line):
