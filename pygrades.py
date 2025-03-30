@@ -2,7 +2,7 @@ import cmd
 from tabulate import tabulate
 
 from utils import file_management as files
-from utils import io
+from utils import input_output as io
 from utils import stats
 
 class CmdParseException(Exception): pass 
@@ -243,15 +243,81 @@ class PyGrades(cmd.Cmd):
 
         for row in rows: print(row)
 
+    def do_adjust(self, line):
+        '''Adjust the grading scale of a course.'''
+        course_name, line = self.match_course(line)
+        if not course_name:
+            course_name = self.select_course()
+        course = self.courses[course_name]
+
+        scale: dict = course["scale"]
+        scale_keys = list(scale.keys())
+        keys_lower_map = {key.lower(): key for key in scale_keys}
+        
+        parts = line.split()
+        if len(parts) == 0:
+            scale_key = None
+            new_grade = None
+        elif len(parts) == 1:
+            scale_key = parts[0]
+            new_grade = None
+        else:
+            scale_key = parts[0]
+            new_grade = parts[1]
+
+        if scale_key not in keys_lower_map:
+            print(io.numbered_list(
+                scale,
+                suffix = lambda key: f"\t{scale[key]}%"
+            ))
+
+            choice = io.input_until_valid(
+                "Enter the number of the grade to adjust: ",
+                lambda c: io.in_range(c, 1, len(scale) + 1)
+            )
+            scale_key = scale_keys[int(choice) - 1]
+        else:
+            scale_key = keys_lower_map[scale_key]
+
+        if new_grade is None or self.match_grade(new_grade) is None:
+            new_grade = io.input_until_valid(
+                f"Enter the new grade for {scale_key}: ",
+                lambda c: c is not None and self.match_grade(c, course_name) is not None
+            )
+            new_grade = self.match_grade(new_grade, course_name)
+
+        if type(new_grade) == str:
+            new_grade = new_grade.replace("%", "")
+        if float(new_grade) == int(new_grade):
+                new_grade = int(new_grade)
+        else:
+            new_grade = float(new_grade)
+
+        old_grade = scale[scale_key]
+
+        conf = io.input_until_valid(
+            f"Move {scale_key} from {old_grade}% to {new_grade}%? (y/n) ",
+            lambda c: io.yes_or_no(c)
+        )
+        if conf == 'y':
+            scale[scale_key] = new_grade
+            print(f"Updated {scale_key} for {course_name}.")
+        else:
+            print("Cancelled adjustment.")
+
+    def do_test(self, line):
+        io.test()
+        print("Tested.")
+        
     def do_needed(self, line):
         course_name, target = self.parse_needed(line)
         if not course_name:
             course_name = self.select_course()
 
-        if target is None or not self.match_grade(target, course_name):
+        if target is None or self.match_grade(target, course_name) is None:
             target = io.input_until_valid(
                 "Enter a target grade: ",
-                lambda c: c is not None and self.match_grade(c, course_name)
+                lambda c: c is not None and self.match_grade(c, course_name) is not None
             )
             target = self.match_grade(target, course_name)
 
@@ -271,7 +337,7 @@ class PyGrades(cmd.Cmd):
         elif needed > 100:
             print(f"Cannot achieve {target_str} in {course_name}.")
         elif needed <= 0:
-            print(f"You have already achieved {target_str}% in {course_name}.")
+            print(f"You have already achieved {target_str} in {course_name}.")
         else:
             print(f"{needed:.2f}% needed on remaining assessments to achieve {target_str}.")
 
@@ -385,7 +451,7 @@ class PyGrades(cmd.Cmd):
             if type(grade) == str:
                 grade = grade.replace("%", "")
             grade_f = float(grade)
-            return grade_f if 0 < grade_f <= 100 else None
+            return grade_f if 0 <= grade_f <= 100 else None
         except ValueError:
             pass
 
@@ -488,7 +554,7 @@ class PyGrades(cmd.Cmd):
 
             target = self.match_grade(line, course)
             
-            if not target:
+            if target is None:
                 raise CmdParseException(f"No valid target grade provided.")
 
         except CmdParseException as e:

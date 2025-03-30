@@ -3,7 +3,7 @@ import glob
 import json
 import jsonschema
 
-from utils import io
+from utils import input_output as io
 
 class OutlineParseError(Exception): pass
 

@@ -1,15 +1,9 @@
 from typing import Callable, Any
 
-def inputln(message):
-    i = input(message)
-    print()
-    return i
-
 def input_until_valid(
     message,
     func: Callable[[str], bool],
-    repeat_message = "",
-    one_line = True
+    repeat_message = ""
 ):
     '''Asks for input until the given lambda function is true.'''
     choice = None
