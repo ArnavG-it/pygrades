@@ -7,15 +7,9 @@ from utils import stats
 
 class CmdParseException(Exception): pass 
 
-SPLASH_MESSAGE = (
-    "Welcome to PyGrades! Ctrl + C at any time to cancel a command or exit."
-)
+SPLASH_MESSAGE = "Welcome to PyGrades! Ctrl + C at any time to cancel a command or exit."
 
-SPLASH = f"""
-|{'=' * (len(SPLASH_MESSAGE) + 2)}|
-| {SPLASH_MESSAGE} |
-|{'=' * (len(SPLASH_MESSAGE) + 2)}|
-"""
+SPLASH = tabulate([[SPLASH_MESSAGE]], tablefmt="rounded_grid")
 
 HELP_ORDER = [
     "Evaluation:",
