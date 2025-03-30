@@ -486,8 +486,11 @@ class PyGrades(cmd.Cmd):
         '''
         course, assessment, number, grade = None, None, None, None
         try:
+            if not line:
+                raise CmdParseException()
+            
             course, line = self.match_course(line)
-            if not course and line != "":
+            if not course:
                 print(line)
                 raise CmdParseException("No valid course provided.")
             
@@ -566,7 +569,7 @@ class PyGrades(cmd.Cmd):
 
             target = self.match_grade(line, course)
             
-            if target is None:
+            if target is None and line:
                 raise CmdParseException(f"No valid target grade provided.")
 
         except CmdParseException as e:
