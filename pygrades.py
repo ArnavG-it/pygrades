@@ -235,8 +235,14 @@ class PyGrades(cmd.Cmd):
         placement = stats.get_letter_grade(course, weighted_avg)
 
         scale = course["scale"]
+        sorted_scale = sorted(
+            scale.items(),
+            reverse = True,
+            key = lambda x: x[1]
+        )
+
         rows = [f"- {course_name}"]
-        for letter, minimum in scale.items():
+        for letter, minimum in sorted_scale:
             rows.append(f"| {letter}\t{minimum}%")
             if placement is not None and letter == placement:
                 rows[-1] += f" <- Current ({weighted_avg:.2f}%)"
@@ -249,11 +255,8 @@ class PyGrades(cmd.Cmd):
         if not course_name:
             course_name = self.select_course()
         course = self.courses[course_name]
-
-        scale: dict = course["scale"]
-        scale_keys = list(scale.keys())
-        keys_lower_map = {key.lower(): key for key in scale_keys}
         
+        # extract arguments for scale key and grade
         parts = line.split()
         if len(parts) == 0:
             scale_key = None
@@ -265,20 +268,26 @@ class PyGrades(cmd.Cmd):
             scale_key = parts[0]
             new_grade = parts[1]
 
-        if scale_key not in keys_lower_map:
+        scale: dict = course["scale"]
+        scale_keys = list(scale.keys())
+        # create lowered key map to match input
+        keys_lower_map = {key.lower(): key for key in scale_keys}
+
+        # resolve scale key
+        if scale_key in keys_lower_map:
+            scale_key = keys_lower_map[scale_key]
+        else:
             print(io.numbered_list(
                 scale,
                 suffix = lambda key: f"\t{scale[key]}%"
             ))
-
             choice = io.input_until_valid(
                 "Enter the number of the grade to adjust: ",
                 lambda c: io.in_range(c, 1, len(scale) + 1)
             )
             scale_key = scale_keys[int(choice) - 1]
-        else:
-            scale_key = keys_lower_map[scale_key]
 
+        # resolve grade
         if new_grade is None or self.match_grade(new_grade) is None:
             new_grade = io.input_until_valid(
                 f"Enter the new grade for {scale_key}: ",
@@ -288,13 +297,12 @@ class PyGrades(cmd.Cmd):
 
         if type(new_grade) == str:
             new_grade = new_grade.replace("%", "")
-        if float(new_grade) == int(new_grade):
-                new_grade = int(new_grade)
-        else:
             new_grade = float(new_grade)
+        if new_grade == int(new_grade):
+            new_grade = int(new_grade)
 
+        # confirm adjustment
         old_grade = scale[scale_key]
-
         conf = io.input_until_valid(
             f"Move {scale_key} from {old_grade}% to {new_grade}%? (y/n) ",
             lambda c: io.yes_or_no(c)
@@ -304,10 +312,6 @@ class PyGrades(cmd.Cmd):
             print(f"Updated {scale_key} for {course_name}.")
         else:
             print("Cancelled adjustment.")
-
-    def do_test(self, line):
-        io.test()
-        print("Tested.")
         
     def do_needed(self, line):
         course_name, target = self.parse_needed(line)
