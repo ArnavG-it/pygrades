@@ -223,8 +223,6 @@ def select_outline() -> str | None:
                 io.in_range(c, 1, len(outline_files) + 1)
         )
 
-        io.clear_lines(len(outline_files) + 2)
-
         chosen_outline = outline_files[int(choice) - 1]
     
     return chosen_outline
@@ -250,8 +248,6 @@ def select_data() -> str | None:
                 io.yes_or_no(c)
         )
 
-        io.clear_lines(1)
-
         if choice == 'y':
             return data_filepaths[0]
         else:
@@ -268,8 +264,6 @@ def select_data() -> str | None:
             func = lambda c:
                 io.in_range(c, 0, len(data_filenames) + 1)
         )
-
-        io.clear_lines(len(data_filenames) + 2)
 
         if int(choice) > 0:
             return data_filepaths[int(choice) - 1]
@@ -297,8 +291,6 @@ def create_data(outline_filename) -> str | None:
             func = lambda c:
                 io.yes_or_no(c)
         )
-
-        io.clear_lines(1)
 
         if choice == 'n':
             return None

@@ -18,8 +18,6 @@ def input_until_valid(
         if not first_ask:
             if repeat_message:
                 message = repeat_message
-            if one_line:
-                clear_lines(1)
 
         choice = input(message).strip()
 
@@ -65,10 +63,3 @@ def numbered_list(
         i += 1
 
     return s
-
-def clear_lines(n):
-    # Disabled for now.
-    # Could be enabled conditonally based
-    # on platform ANSI support.
-    return
-    print("\033[F\033[K" * n, end="")

@@ -95,7 +95,6 @@ class GradeTracker(cmd.Cmd):
                 new_grade = -1
             else:
                 new_grade = new_grade.replace("%", "")
-            io.clear_lines(1)
 
         # resolve sentinel value grade to None
         if new_grade == -1:
@@ -112,7 +111,6 @@ class GradeTracker(cmd.Cmd):
                 func = lambda c:
                     io.yes_or_no(c)
             )
-            io.clear_lines(1)
             if choice == 'n':
                 print("Cancelled updating grade.")
                 return
@@ -411,7 +409,8 @@ class GradeTracker(cmd.Cmd):
         course, assessment, number, grade = None, None, None, None
         try:
             course, line = self.match_course(line)
-            if not course:
+            if not course and line != "":
+                print(line)
                 raise CmdParseException("No valid course provided.")
             
             # match assessment
@@ -511,9 +510,6 @@ class GradeTracker(cmd.Cmd):
             func = lambda c:
                 io.in_range(c, 1, len(self.courses) + 1)
         )
-
-        io.clear_lines(len(self.courses) + 2)
-
         if choice == 0:
             return None
         else:
@@ -550,8 +546,6 @@ class GradeTracker(cmd.Cmd):
                 )
         )
 
-        io.clear_lines(len(assessments) + 2)
-
         if choice.isnumeric():
             assessment = list(assessments.keys())[int(choice) - 1]
         else: # key str
@@ -575,8 +569,6 @@ class GradeTracker(cmd.Cmd):
             number = int(number) - 1
         else:
             number = 0
-
-        io.clear_lines(len(grades) + 2)
 
         return number
 
