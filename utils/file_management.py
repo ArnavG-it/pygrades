@@ -4,11 +4,44 @@ import json
 import jsonschema
 
 from utils import io
-from utils.constants import DATA_SCHEMA
 
 class OutlineParseError(Exception): pass
 
 class DataFileError(Exception): pass
+
+DATA_SCHEMA = {
+    "type": "object",
+    "additionalProperties": {
+        "type": "object",
+        "properties": {
+            "assessments": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                        "weight": {"type": "number"},
+                        "amount": {"type": "number"},
+                        "dropped": {"type": "number"},
+                        "grades": {
+                            "type": "array",
+                            "items": {
+                                "type": ["number", "null"]
+                            }
+                        }
+                    },
+                    "required": ["weight", "amount", "dropped", "grades"]
+                }
+            },
+            "scale": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "number"
+                }
+            }
+        },
+        "required": ["assessments", "scale"]
+    }
+}
 
 def setup_cmd() -> tuple[dict, str]:
     '''

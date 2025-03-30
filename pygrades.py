@@ -8,7 +8,7 @@ from utils import stats
 class CmdParseException(Exception): pass 
 
 SPLASH_MESSAGE = (
-    "Welcome to PyGradeTracker! Ctrl + C at any time to cancel a command or exit."
+    "Welcome to PyGrades! Ctrl + C at any time to cancel a command or exit."
 )
 
 SPLASH = f"""
@@ -17,7 +17,7 @@ SPLASH = f"""
 |{'=' * (len(SPLASH_MESSAGE) + 2)}|
 """
 
-class GradeTracker(cmd.Cmd):
+class PyGrades(cmd.Cmd):
     intro = "Type help or ? to list commands.\n"
     prompt = "> "
 
@@ -577,4 +577,4 @@ class GradeTracker(cmd.Cmd):
 # ===== #
 
 if __name__ == '__main__':
-    GradeTracker().customloop()
+    PyGrades().customloop()
