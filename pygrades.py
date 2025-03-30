@@ -17,6 +17,14 @@ SPLASH = f"""
 |{'=' * (len(SPLASH_MESSAGE) + 2)}|
 """
 
+HELP_ORDER = [
+    "Evaluation:",
+    "grade", "overview", "summary",
+    "scale", "max", "needed", "adjust",
+    "Program:",
+    "switch", "save", "exit", "quit", "help"
+]
+
 class PyGrades(cmd.Cmd):
     intro = "Type help or ? to list commands.\n"
     prompt = "> "
@@ -63,8 +71,41 @@ class PyGrades(cmd.Cmd):
     # Commands #
     # ======== #
 
+    def do_help(self, arg):
+        '''
+        - List all commands, or get help for a specific one.
+
+        Optional argument:
+        [command] -> The command you want help with
+
+        Syntax: help [command]
+        '''
+        if arg:
+            super().do_help(arg)
+        else:
+            print("Enter 'help [command]' to get help for a specific command.")
+            for name in HELP_ORDER:
+                func = getattr(self, f"do_{name}", None)
+                if func:
+                    doc = func.__doc__
+                    explanation = str(doc).split("\n")[1]
+                    print(f"{name:<10}{explanation}")
+                else:
+                    print()
+                    print(name)
+
     def do_grade(self, line):
-        '''Update a grade.'''
+        '''
+        - Update a grade.
+
+        Optional arguments:
+        [course] \t -> Course identifier
+        [assessment] \t -> Assessment name
+        [number] \t -> Assessment number, if there are multiple
+        [grade] \t -> Received grade (can be "none")
+
+        Syntax: grade [course] [assessment] [number] [grade]
+        '''
         course, assessment, num, new_grade = self.parse_grade(line)
         
         if not course:
@@ -122,7 +163,14 @@ class PyGrades(cmd.Cmd):
         print(f"Updated {course} {assessment_str} to {new_grade}{'%' * (new_grade is not None)}.")
 
     def do_summary(self, line):
-        '''Summarize grades for a course.'''
+        '''
+        - Summarize grades for a course.
+
+        Optional argument:
+        [course] -> Course identifier
+
+        Syntax: summary [course]
+        '''
         show_all = line == "all"
         if show_all:
             for course in self.courses:
@@ -217,7 +265,11 @@ class PyGrades(cmd.Cmd):
         ))
 
     def do_overview(self, line):
-        '''View the status of each course.'''
+        '''
+        - See an overview of all courses.
+
+        Syntax: overview
+        '''
         table = []
         for name, data in self.courses.items():
             weighted_average_str, total_achieved_str = stats.course_totals(data)
@@ -232,7 +284,14 @@ class PyGrades(cmd.Cmd):
         ))
 
     def do_scale(self, line):
-        '''View the grade scale for a course.'''
+        '''
+        - View the grade scale for a course.
+
+        Optional argument:
+        [course] -> Course identifier
+
+        Syntax: scale [course]
+        '''
         course_name, _ = self.match_course(line)
         if not course_name:
             course_name = self.select_course()
@@ -257,7 +316,16 @@ class PyGrades(cmd.Cmd):
         for row in rows: print(row)
 
     def do_adjust(self, line):
-        '''Adjust the grading scale of a course.'''
+        '''
+        - Adjust the grading scale of a course.
+
+        Optional arguments:
+        [course] \t -> Course identifier
+        [grade] \t -> Grade to adjust (ex. A+)
+        [minimum] \t -> New minimum grade for the key (ex. 90%)
+
+        Syntax: adjust [course] [key] [minimum]
+        '''
         course_name, line = self.match_course(line)
         if not course_name:
             course_name = self.select_course()
@@ -321,6 +389,15 @@ class PyGrades(cmd.Cmd):
             print("Cancelled adjustment.")
         
     def do_needed(self, line):
+        '''
+        - See how well you need to do to achieve a target grade.
+
+        Optional arguments:
+        [course] \t -> Course identifier
+        [grade] \t -> Target grade (can be a percentage or scale key, ex. A+)
+
+        Syntax: needed [course] [grade]
+        '''
         course_name, target = self.parse_needed(line)
         if not course_name:
             course_name = self.select_course()
@@ -353,6 +430,14 @@ class PyGrades(cmd.Cmd):
             print(f"{needed:.2f}% needed on remaining assessments to achieve {target_str}.")
 
     def do_max(self, line):
+        '''
+        - See what the maximum grade you can get in a course is.
+
+        Optional argument:
+        [course] -> Course identifier
+
+        Syntax: max [course]
+        '''
         course, _ = self.match_course(line)
         if not course:
             course = self.select_course()
@@ -366,6 +451,9 @@ class PyGrades(cmd.Cmd):
         print(s)
 
     def do_save(self, line):
+        '''
+        - Save changes.
+        '''
         success = files.write_data(self.courses, self.filename)
         if success:
             print("Saved changes.")
@@ -373,7 +461,9 @@ class PyGrades(cmd.Cmd):
             raise SystemExit
         
     def do_switch(self, line):
-        '''Switch to another data file.'''
+        '''
+        - Switch to another data file.
+        '''
         save = io.input_until_valid(
             f"Save changes to {self.filename}? (y/n)",
             lambda c: io.yes_or_no(c)
@@ -395,7 +485,9 @@ class PyGrades(cmd.Cmd):
         print(self.intro, end="")
 
     def do_exit(self, line):
-        '''Save and exit the program.'''
+        '''
+        - Save and exit the program.
+        '''
         print("Saving...")
         if hasattr(self, "courses") and hasattr(self, "filename"):
             files.write_data(self.courses, self.filename)
@@ -403,7 +495,9 @@ class PyGrades(cmd.Cmd):
         return True
     
     def do_quit(self, line):
-        '''Quit without saving.'''
+        '''
+        - Quit without saving.
+        '''
         conf = io.input_until_valid(
             "Are you sure you want to quit without saving? (y/n) ",
             lambda c: io.yes_or_no(c)
