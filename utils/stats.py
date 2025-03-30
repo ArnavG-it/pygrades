@@ -110,17 +110,26 @@ def needed_for_target(assessments: dict, target_grade) -> float | None:
         kept, dropped = filter_dropped(a)
         to_keep = a["amount"] - a["dropped"]
         completed_grades = filter_ungraded(kept)
-        incomplete = to_keep - len(completed_grades)
+        remaining = to_keep - len(completed_grades)
 
-        # handle potential grades that could be dropped
+        # adjust for potential grades that could be dropped
         to_drop = a["dropped"] - len(dropped)
-        if incomplete == 0:
-            incomplete += to_drop
+        if len(dropped) < to_drop:
+            remaining += to_drop
+        if remaining > to_keep:
+            remaining = to_keep
 
         # accumulate sums
         weight = a["weight"]
-        achieved_weighted_sum += achieved_weight(a) * 100
-        remaining_fraction_sum += incomplete / to_keep * weight
+
+        # drop lowest completed grades if possible
+        kept_min, _ = filter_dropped(a, maximize=False)
+        kept_min = filter_ungraded(kept_min)
+
+        achieved = sum(kept_min)
+        
+        achieved_weighted_sum += achieved * weight / to_keep
+        remaining_fraction_sum += remaining * weight / to_keep
 
     if remaining_fraction_sum == 0:
         return None

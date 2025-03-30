@@ -235,9 +235,9 @@ class GradeTracker(cmd.Cmd):
         placement = stats.get_letter_grade(course, weighted_avg)
 
         scale = course["scale"]
-        rows = [f"-- {course_name} Scale --"]
+        rows = [f"- {course_name}"]
         for letter, minimum in scale.items():
-            rows.append(f"{letter}\t{minimum}%")
+            rows.append(f"| {letter}\t{minimum}%")
             if placement is not None and letter == placement:
                 rows[-1] += f" <- Current ({weighted_avg:.2f}%)"
 
