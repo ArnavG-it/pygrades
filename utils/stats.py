@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 def achieved_weight(assessment: dict):
     '''Returns the achieved weight of the assessment, in percent.'''
     weight = int(assessment["weight"])
@@ -46,7 +48,7 @@ def total_weighted_average(assessments: dict):
     '''Calculates the achieved weighted average of a course.'''
     completed_weight = 0
     total = 0
-    for name, data in assessments.items():
+    for _name, data in assessments.items():
         weight = data["weight"]
         kept, _ = filter_dropped(data)
         total += interim_weight(kept) * weight / 100
@@ -99,6 +101,15 @@ def needed_for_target(assessments: dict, target_grade) -> float | None:
     x = (target_grade * 100 - achieved_weighted_sum) / remaining_fraction_sum
 
     return x
+
+def max_grade_possible(assessments: dict) -> float:
+    '''Returns the maximum grade achievable.'''
+    # brute force by simulating remaining grades as 100%
+    sim = deepcopy(assessments)
+    for _name, a in sim.items():
+        grades = a["grades"]
+        a["grades"] = list(100 if grade is None else grade for grade in grades)
+    return total_weighted_average(sim)
 
 def filter_dropped(assessment: dict, maximize = True) -> tuple[list, list]:
     '''

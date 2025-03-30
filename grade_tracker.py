@@ -489,6 +489,19 @@ class GradeTracker(cmd.Cmd):
         else:
             print(f"{needed:.2f}% needed on remaining assessments to achieve {target_str}.")
 
+    def do_max(self, line):
+        course, _ = self.match_course(line)
+        if not course:
+            course = self.select_course()
+        
+        max = stats.max_grade_possible(self.courses[course]["assessments"])
+        scale_key = stats.get_letter_grade(self.courses[course], max)
+
+        s = f"The maximum grade possible for {course} is {max:.2f}%"
+        if scale_key:
+            s += f" ({scale_key})"
+        print(s)
+
     def do_save(self, line):
         success = files.write_data(self.courses, self.filename)
         if success:
