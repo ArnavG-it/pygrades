@@ -358,17 +358,20 @@ def parse_outline(filename) -> dict | None:
             line_num += 1
             line = line.strip()
             if line:
-                if line.startswith("Course "):
-                    # Create a new course
-                    current_course = line[len("Course "):]
-                    courses[current_course] = {
-                        "assessments": {},
-                        "scale": {}
-                    }
+                try:
+                    if line.startswith("Course "):
+                        # Create a new course
+                        current_course = line[len("Course "):]
+                        if current_course == "all":
+                            current_course = None
+                            raise OutlineParseError(f"Course can not be named 'all'.")
+                        courses[current_course] = {
+                            "assessments": {},
+                            "scale": {}
+                        }
 
-                elif line[0].isdigit() and current_course:
-                    # Add a grade item
-                    try:
+                    elif line[0].isdigit() and current_course:
+                        # Add a grade item
                         parts = line.split()
                         
                         if len(parts) == 3:
@@ -400,14 +403,9 @@ def parse_outline(filename) -> dict | None:
                             "dropped": dropped,
                             "grades": [None] * amount
                         }
-                    except OutlineParseError as e:
-                        print(f"Error at line {line_num}:")
-                        print(e)
-                        error = True
 
-                elif line[0] in "ABCDEF" and current_course:
-                    # Add to the grade scale
-                    try:
+                    elif line[0] in "ABCDEF" and current_course:
+                        # Add to the grade scale
                         parts = line.split()
                         if len(parts) != 2:
                             raise OutlineParseError(f"Invalid letter grade: '{line}'")
@@ -415,10 +413,10 @@ def parse_outline(filename) -> dict | None:
                         letter, minimum = parts[0], int(parts[1])
 
                         courses[current_course]["scale"][letter] = minimum
-                    except OutlineParseError as e:
-                        print(f"Error at line {line_num}:")
-                        print(e)
-                        error = True
+                except OutlineParseError as e:
+                    print(f"Error at line {line_num}:")
+                    print(e)
+                    error = True
 
     return courses if not error else None
 

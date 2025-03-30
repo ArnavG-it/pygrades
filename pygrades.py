@@ -123,6 +123,13 @@ class PyGrades(cmd.Cmd):
 
     def do_summary(self, line):
         '''Summarize grades for a course.'''
+        show_all = line == "all"
+        if show_all:
+            for course in self.courses:
+                self.do_summary(course)
+                print()
+            return
+
         course, _ = self.match_course(line)
         if not course:
             course = self.select_course()
