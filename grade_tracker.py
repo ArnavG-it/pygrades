@@ -37,31 +37,10 @@ class GradeTracker(cmd.Cmd):
 
     def preloop(self):
         print(SPLASH)
-
-        files.setup_dirs()
-
-        chosen_data = None
-        while chosen_data is None:
-            chosen_data = files.select_data()
-            if not chosen_data:
-                chosen_outline = files.select_outline()
-                if not chosen_outline:
-                    print("No grade outline files were found. Please create one.")
-                    raise SystemExit
-                else:
-                    chosen_data = files.create_data(chosen_outline)
-
-        data = files.load_data(chosen_data)
-
-        if data is None:
-            raise SystemExit
-        
+        data, filename = files.setup_cmd()
         self.courses = data
-
-        filename, _ = files.filename_from_path(chosen_data)
         self.filename = filename
-
-        print(f"\nLoaded grades for {self.filename}.")
+        print(f"\nLoaded data for {self.filename}.")
 
     def onecmd(self, line):
         try:
@@ -296,6 +275,28 @@ class GradeTracker(cmd.Cmd):
             print("Saved changes.")
         else:
             raise SystemExit
+        
+    def do_switch(self, line):
+        '''Switch to another data file.'''
+        save = io.input_until_valid(
+            f"Save changes to {self.filename}? (y/n)",
+            lambda c: io.yes_or_no(c)
+        )
+        
+        print()
+        if save == 'y':
+            files.write_data(self.courses, self.filename)
+            print("Successfully saved data.")
+        else:
+            print("NOTICE: Continuing without saving.")
+            print("(You can cancel this command with Ctrl + C)")
+        print()
+
+        data, filename = files.setup_cmd()
+        self.courses = data
+        self.filename = filename
+        print(f"\nLoaded data for {self.filename}.")
+        print(self.intro, end="")
 
     def do_exit(self, line):
         '''Save and exit the program.'''

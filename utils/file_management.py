@@ -10,6 +10,35 @@ class OutlineParseError(Exception): pass
 
 class DataFileError(Exception): pass
 
+def setup_cmd() -> tuple[dict, str]:
+    '''
+    Sets up the CLI with valid data.
+    Can raise SystemExit.
+
+    Returns the data and filename without extension.
+    '''
+    setup_dirs()
+
+    chosen_data = None
+    while chosen_data is None:
+        chosen_data = select_data()
+        if not chosen_data:
+            chosen_outline = select_outline()
+            if not chosen_outline:
+                print("No grade outline files were found. Please create one.")
+                raise SystemExit
+            else:
+                chosen_data = create_data(chosen_outline)
+
+    data = load_data(chosen_data)
+
+    if data is None:
+        raise SystemExit
+
+    filename, _ = filename_from_path(chosen_data)
+
+    return data, filename
+
 def setup_dirs():
     if not os.path.exists("outlines"):
         os.mkdir("outlines")
