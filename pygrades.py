@@ -20,7 +20,7 @@ HELP_ORDER = [
 ]
 
 class PyGrades(cmd.Cmd):
-    intro = "Type help or ? to list commands.\n"
+    intro = "Type help to list commands.\n"
     prompt = "> "
 
     # ============= #

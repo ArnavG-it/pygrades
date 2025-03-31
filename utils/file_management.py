@@ -56,11 +56,16 @@ def setup_cmd() -> tuple[dict, str]:
         chosen_data = select_data()
         if not chosen_data:
             chosen_outline = select_outline()
-            if not chosen_outline:
-                print("No grade outline files were found. Please create one.")
-                io.notify_and_exit()
-            else:
-                chosen_data = create_data(chosen_outline)
+            if not chosen_outline or "Example" in chosen_outline:
+                choice = io.input_until_valid(
+                    "No grade outline files were found. Load the example? (Y/N) ",
+                    lambda c: io.yes_or_no(c),
+                    repeat_message = "Invalid input. Load the example? (Y/N) "
+                )
+                if choice == 'n':
+                    print("Please see the README for help with creating an outline.")
+                    io.notify_and_exit()
+            chosen_data = create_data(chosen_outline)
 
     data = load_data(chosen_data)
 
@@ -332,7 +337,7 @@ def create_data(outline_filename) -> str | None:
     course_data = parser.parse(outline_filename)
     
     if course_data is None or not validate_outline(course_data):
-        print("Please see the README for help creating an outline.")
+        print("Please see the README for help with creating an outline.")
         io.notify_and_exit()
     
     write_data(course_data, data_filename)
