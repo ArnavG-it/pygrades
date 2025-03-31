@@ -508,31 +508,28 @@ class PyGrades(cmd.Cmd):
 
     def match_course(self, line: str):
         '''
-        Tries to match a course by its name or code.
+        Tries to match a course by any of its identifiers.
 
         Returns the course if found, and the line
         with the course identifier removed.
         '''
         if not line:
             return None, line
-        
-        # match course by name or code
+
         matches = []
         for c in self.courses:
-            name, code = c.lower().split()
-            if name in line or code in line:
-                if name and code in line:
-                    matches = [c]
-                    break
-                else:
+            ids = c.lower().split()
+            for id in ids:
+                if id in line:
                     matches.append(c)
+                    break
                 
         if len(matches) == 1:
             course = matches[0]
-            name, code = course.lower().split()
+            ids = course.lower().split()
             # remove identifiers from line
-            line = line.replace(name, "").strip()
-            line = line.replace(code, "").strip()
+            for id in ids:
+                line = line.replace(id, "").strip()
 
         else:
             course = None
