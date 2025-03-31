@@ -482,10 +482,9 @@ class PyGrades(cmd.Cmd):
         '''
         - Save and exit the program.
         '''
-        print("Saving...")
         if hasattr(self, "courses") and hasattr(self, "filename"):
             files.write_data(self.courses, self.filename)
-        input("Saved data. Press Enter to exit.")
+            input("Saved data. Press Enter to exit.")
         return True
     
     def do_quit(self, line):
