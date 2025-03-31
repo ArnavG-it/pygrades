@@ -543,6 +543,16 @@ class PyGrades(cmd.Cmd):
 
         Returns the grade as a percentage if valid.
         '''
+        # try as scale key
+        if course in self.courses.keys() and type(grade) == str:
+            scale = self.courses[course]["scale"]
+            scale_lower = {
+                key.lower(): val for key, val in scale.items()
+            }
+            grade = grade.lower()
+            if grade in scale_lower.keys():
+                return scale_lower[grade]
+            
         # try as percentage
         try:
             if type(grade) == str:
@@ -552,16 +562,6 @@ class PyGrades(cmd.Cmd):
         except ValueError:
             pass
 
-        # try as scale key
-        if course in self.courses.keys():
-            scale = self.courses[course]["scale"]
-            scale_lower = {
-                key.lower(): val for key, val in scale.items()
-            }
-            grade = grade.lower()
-            if grade in scale_lower.keys():
-                return scale_lower[grade]
-        
         return None
 
     def parse_grade(self, line: str) -> tuple[str, str, int, int]:
