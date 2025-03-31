@@ -4,8 +4,7 @@ import json
 import jsonschema
 
 from utils import input_output as io
-
-class OutlineParseError(Exception): pass
+from utils.outline_parser import OutlineParser, validate_outline
 
 class DataFileError(Exception): pass
 
@@ -329,139 +328,13 @@ def create_data(outline_filename) -> str | None:
         if choice == 'n':
             return None
 
-    course_data = parse_outline(outline_filename)
+    parser = OutlineParser()
+    course_data = parser.parse(outline_filename)
     
-    if course_data is None:
-        print("Please see the README for help creating an outline.")
-        io.notify_and_exit()
-    
-    valid = validate_outline(course_data)
-
-    if not valid:
+    if course_data is None or not validate_outline(course_data):
         print("Please see the README for help creating an outline.")
         io.notify_and_exit()
     
     write_data(course_data, data_filename)
 
     return os.path.join("data", data_filename)
-
-def parse_outline(filename) -> dict | None:
-    '''
-    Parses an outline file into a dictionary of courses.
-    Returns None if the outline is invalid.
-    '''
-    courses = {}
-    error = False
-    with open(os.path.join("outlines", filename), "r") as f:
-        current_course = None
-        line_num = 0
-        for line in f:
-            line_num += 1
-            line = line.strip()
-            if line:
-                try:
-                    if line.startswith("Course "):
-                        # Create a new course
-                        current_course = line[len("Course "):]
-                        if current_course == "all":
-                            current_course = None
-                            raise OutlineParseError(f"Course can not be named 'all'.")
-                        courses[current_course] = {
-                            "assessments": {},
-                            "scale": {}
-                        }
-
-                    elif line[0].isdigit() and current_course:
-                        # Add a grade item
-                        parts = line.split()
-                        
-                        if len(parts) == 3:
-                            amount, name, weight = parts[0], parts[1], parts[2]
-                            drop, dropped = "", 0
-                        elif len(parts) == 5:
-                            amount, drop, dropped, name, weight = (
-                                parts[0], parts[1], parts[2], parts[3], parts[4]
-                            )
-                        else:
-                            raise OutlineParseError(f"Invalid assessment syntax: '{line}'")
-
-                        try:
-                            amount = int(amount)
-                            dropped = int(dropped)
-                            if len(parts) == 5 and drop != "drop":
-                                raise OutlineParseError(f"Invalid assessment syntax: '{line}'")
-                        except ValueError:
-                            raise OutlineParseError(f"Non-numeric values: '{line}'")
-
-                        if weight[-1] == '%' and weight[:-1].isnumeric():
-                            weight = int(weight[:-1])
-                        else:
-                            raise OutlineParseError(f"Invalid weight: '{line}'")
-
-                        courses[current_course]["assessments"][name] = {
-                            "weight": weight,
-                            "amount": amount,
-                            "dropped": dropped,
-                            "grades": [None] * amount
-                        }
-
-                    elif line[0] in "ABCDEF" and current_course:
-                        # Add to the grade scale
-                        parts = line.split()
-                        if len(parts) != 2:
-                            raise OutlineParseError(f"Invalid letter grade: '{line}'")
-                        
-                        letter, minimum = parts[0], int(parts[1])
-
-                        courses[current_course]["scale"][letter] = minimum
-                except OutlineParseError as e:
-                    print(f"Error at line {line_num}:")
-                    print(e)
-                    error = True
-
-    return courses if not error else None
-
-def validate_outline(courses: dict) -> bool:
-    '''Does numerical checks on course data to ensure it's sensible.'''
-    schema_error = validate_schema(courses)
-    if schema_error: return False
-
-    error = False
-    try:
-        for c_name, course in courses.items():
-            # sort the scale in descending order
-            scale = course["scale"]
-            course["scale"] = dict(sorted(
-                scale.items(),
-                key = lambda pair: pair[1],
-                reverse = True
-            ))
-
-            total_weight = 0
-            for a_name, a in course["assessments"].items():
-                weight = a["weight"]
-                assert weight > 0, (
-                    f"Weight must be positive for {c_name} {a_name}."
-                )
-
-                total_weight += a["weight"]
-
-                dropped = a["dropped"]
-                assert dropped >= 0, (
-                    f"Dropped amount is negative in {c_name} {a_name}."
-                )
-
-                assert a["amount"] > a["dropped"], (
-                    f"Too many dropped assessments in {c_name} {a_name}."
-                )
-                
-            assert total_weight == 100, (
-                f"Total weight does not add up to 100% in {c_name}."
-            )
-    except AssertionError as e:
-        print("\nERROR: Numerical inconsistency in outline:")
-        print(e)
-        print()
-        error = True
-    
-    return not error
