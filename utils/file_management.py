@@ -4,45 +4,13 @@ import json
 import jsonschema
 
 from utils import input_output as io
-from utils.outline_parser import OutlineParser, validate_outline
+from utils.outline_parser import OutlineParser
+from utils.validation import (
+    validate_json, validate_outline, validate_schema,
+    handle_creation_error, DATA_TEMPLATE
+)
 
-class DataFileError(Exception): pass
-
-DATA_SCHEMA = {
-    "type": "object",
-    "additionalProperties": {
-        "type": "object",
-        "properties": {
-            "assessments": {
-                "type": "object",
-                "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                        "weight": {"type": "number"},
-                        "amount": {"type": "number"},
-                        "dropped": {"type": "number"},
-                        "grades": {
-                            "type": "array",
-                            "items": {
-                                "type": ["number", "null"]
-                            }
-                        }
-                    },
-                    "required": ["weight", "amount", "dropped", "grades"]
-                }
-            },
-            "scale": {
-                "type": "object",
-                "additionalProperties": {
-                    "type": "number"
-                }
-            }
-        },
-        "required": ["assessments", "scale"]
-    }
-}
-
-def setup_cmd() -> tuple[dict, str]:
+def setup_cmd(startup = True) -> tuple[dict, str]:
     '''
     Sets up the CLI with valid data.
     Can raise SystemExit.
@@ -53,18 +21,19 @@ def setup_cmd() -> tuple[dict, str]:
 
     chosen_data = None
     while chosen_data is None:
-        chosen_data = select_data()
+        chosen_data = select_data(startup)
         if not chosen_data:
             chosen_outline = select_outline()
-            if not chosen_outline or "Example" in chosen_outline:
+            if chosen_outline and "Example" in chosen_outline:
                 choice = io.input_until_valid(
-                    "No grade outline files were found. Load the example? (Y/N) ",
+                    "Load the example? (Y/N) ",
                     lambda c: io.yes_or_no(c),
                     repeat_message = "Invalid input. Load the example? (Y/N) "
                 )
-                if choice == 'n':
-                    print("Please see the README for help with creating an outline.")
-                    io.notify_and_exit()
+            else: choice = ''
+            if not chosen_outline or choice == 'n':
+                print("Please see the README for help with creating an outline.")
+                io.notify_and_exit()
             chosen_data = create_data(chosen_outline)
 
     data = load_data(chosen_data)
@@ -103,21 +72,6 @@ def get_unique_filepath(path, name, ext) -> str:
         filepath = os.path.join(path, f"{name}({count}){ext}")
         count += 1
     return filepath
-
-def validate_schema(data: dict) -> DataFileError | None:
-    try:
-        jsonschema.validate(data, DATA_SCHEMA)
-        return None
-    except jsonschema.ValidationError as e:
-        return DataFileError(e)
-    
-def validate_json(filepath) -> DataFileError | None:
-    with open(filepath, 'r') as f:
-        try:
-            d = json.load(f)
-            return None
-        except json.decoder.JSONDecodeError as e:
-            return DataFileError(e)
 
 def write_data(data, filename) -> bool:
     '''
@@ -264,7 +218,7 @@ def select_outline() -> str | None:
     
     return chosen_outline
 
-def select_data() -> str | None:
+def select_data(startup = True) -> str | None:
     '''
     Finds a data file to load.
     Returns the filepath, if found.
@@ -277,7 +231,10 @@ def select_data() -> str | None:
         return None
     
     elif len(data_filenames) == 1:
-        message = f"Load {data_filenames[0][:-len(".json")]}? (Y/N) "
+        # avoid prompting for the file that was just switched from
+        if not startup: return None
+
+        message = f"Load data from {data_filenames[0][:-len(".json")]}? (Y/N) "
         choice = io.input_until_valid(
             message = message,
             repeat_message = "Invalid input. " + message,
@@ -335,10 +292,13 @@ def create_data(outline_filename) -> str | None:
 
     parser = OutlineParser()
     course_data = parser.parse(outline_filename)
-    
-    if course_data is None or not validate_outline(course_data):
-        print("Please see the README for help with creating an outline.")
+    error = validate_outline(course_data)
+
+    if course_data is None:
         io.notify_and_exit()
+
+    if error is not None:
+        handle_creation_error(error, course_data)
     
     write_data(course_data, data_filename)
 

@@ -1,7 +1,5 @@
 import os
 
-from utils import file_management as files
-
 class OutlineParseError(Exception): pass
 
 class OutlineParser:
@@ -25,8 +23,9 @@ class OutlineParser:
                         self.line_num += 1
 
         except OutlineParseError as e:
-            print(f"Error at line {self.line_num}:")
+            print(f"\nERROR at line {self.line_num}:")
             print(e)
+            print()
             error = True
 
         return self.courses if not error else None
@@ -109,48 +108,3 @@ class OutlineParser:
         minimum = int(minimum)
 
         self.courses[self.current_course]["scale"][grade] = minimum
-
-def validate_outline(courses: dict) -> bool:
-    '''Does numerical checks on course data to ensure it's sensible.'''
-    schema_error = files.validate_schema(courses)
-    if schema_error: return False
-
-    error = False
-    try:
-        for c_name, course in courses.items():
-            # sort the scale in descending order
-            scale = course["scale"]
-            course["scale"] = dict(sorted(
-                scale.items(),
-                key = lambda pair: pair[1],
-                reverse = True
-            ))
-
-            total_weight = 0
-            for a_name, a in course["assessments"].items():
-                weight = a["weight"]
-                assert weight > 0, (
-                    f"Weight must be positive for {c_name} {a_name}."
-                )
-
-                total_weight += a["weight"]
-
-                dropped = a["dropped"]
-                assert dropped >= 0, (
-                    f"Dropped amount is negative in {c_name} {a_name}."
-                )
-
-                assert a["amount"] > a["dropped"], (
-                    f"Too many dropped assessments in {c_name} {a_name}."
-                )
-                
-            assert total_weight == 100, (
-                f"Total weight does not add up to 100% in {c_name}."
-            )
-    except AssertionError as e:
-        print("\nERROR: Numerical inconsistency in outline:")
-        print(e)
-        print()
-        error = True
-    
-    return not error

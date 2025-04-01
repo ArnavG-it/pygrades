@@ -472,7 +472,7 @@ class PyGrades(cmd.Cmd):
             print("(You can cancel this command with Ctrl + C)")
         print()
 
-        data, filename = files.setup_cmd()
+        data, filename = files.setup_cmd(startup=False)
         self.courses = data
         self.filename = filename
         print(f"\nLoaded data for {self.filename}.")
