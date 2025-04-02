@@ -21,7 +21,7 @@ HELP_ORDER = [
 
 class PyGrades(cmd.Cmd):
     intro = "Type help to list commands.\n"
-    prompt = "> "
+    prompt = "[π] > "
 
     # ============= #
     # Cmd Overrides #

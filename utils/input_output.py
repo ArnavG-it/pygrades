@@ -26,11 +26,11 @@ def input_until_valid(
 
 def in_range(c: str, start, end):
     '''Returns whether a string is numeric and in the given range'''
-    return (
-        c is not None and
-        c.isnumeric() and
-        int(c) in range(start, end)
-    )
+    try:
+        val = float(c)
+        return start <= val < end
+    except (ValueError, TypeError):
+        return False
 
 def yes_or_no(c: str):
     return (
