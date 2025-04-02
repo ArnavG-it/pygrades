@@ -1,5 +1,8 @@
-data/
-outlines/
+data/*
+outlines/*
+!outlines/Example.txt
+
+# Auto-generated ignores:
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

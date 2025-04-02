@@ -291,15 +291,20 @@ class PyGrades(cmd.Cmd):
             course_name = self.select_course()
         course = self.courses[course_name]
 
-        weighted_avg = stats.total_weighted_average(course["assessments"])
-        placement = stats.get_letter_grade(course, weighted_avg)
-
         scale = course["scale"]
         sorted_scale = sorted(
             scale.items(),
             reverse = True,
             key = lambda x: x[1]
         )
+
+        # handle sentinel value representing no scale
+        if "None" in scale.keys():
+            print(f"{course_name} has no grade scale.")
+            return
+
+        weighted_avg = stats.total_weighted_average(course["assessments"])
+        placement = stats.get_letter_grade(course, weighted_avg)
 
         rows = [f"- {course_name}"]
         for letter, minimum in sorted_scale:
