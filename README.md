@@ -114,3 +114,30 @@ Please select a course: 1
 | C     60%
 | D     50%
 ```
+
+### Calculating Projections
+
+Beyond just seeing your current progress,
+PyGrades can help you plan for the future.
+
+The `needed` command will calculate the average grade you
+need to get on your remaining assessments to achieve a certain grade.
+You can enter this grade as either a percentage or scale item:
+```
+[π] > needed
+1. Math 101
+2. Chem 200
+Please select a course: 1
+Enter a target grade: A+
+91.33% needed on remaining assessments to achieve 90.0% (A+).
+```
+
+In tandem, the `max` command will calculate the maximum
+grade you can achieve, accounting for grades that could be dropped:
+```
+[π] > max
+1. Math 101
+2. Chem 200
+Please select a course: 1
+The maximum grade possible for Math 101 is 96.50% (A+)
+```
