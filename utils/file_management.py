@@ -1,7 +1,6 @@
 import os
 import glob
 import json
-import jsonschema
 
 from utils import input_output as io
 from utils.outline_parser import OutlineParser
