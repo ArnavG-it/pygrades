@@ -98,7 +98,7 @@ def write_data(data, filename) -> bool:
         print()
         # prepare corrupted file to be written
         path = os.path.join(path, "corrupt")
-        filename += "(corrupted)"
+        filename += "(corrupt)"
 
     if ".json" not in filename:
         filename += ".json"
