@@ -534,21 +534,22 @@ class PyGrades(cmd.Cmd):
         '''
         if not line:
             return None, line
+        
+        line_ids = set(line.lower().split())
 
         matches = []
         for c in self.courses:
-            ids = c.lower().split()
-            for id in ids:
-                if id in line:
-                    matches.append(c)
-                    break
+            course_ids = set(c.lower().split())
+            # check for id intersections
+            if line_ids & course_ids:
+                matches.append(c)
                 
         if len(matches) == 1:
             course = matches[0]
-            ids = course.lower().split()
+            course_ids = set(course.lower().split())
             # remove identifiers from line
-            for id in ids:
-                line = line.replace(id, "").strip()
+            line_ids -= course_ids
+            line = " ".join(line_ids)
 
         else:
             course = None
