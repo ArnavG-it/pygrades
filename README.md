@@ -11,13 +11,15 @@ A command-line tool for students to track and assess their grades.
 
 ## Usage
 
-### Loading an Outline
-
+<details>
+<summary>
+<h3>Loading an Outline</h3>
+</summary>
 The first time you install and run PyGrades, you will be prompted to load the example outline.
 
 You can:
 - Type `y` and press Enter to proceed with the example (recommended for new users).
-- See [Creating an Outline]() and create your own outline.
+- See [Creating an Outline](#creating-an-outline) and create your own outline.
   You will need to restart the program to see new files.
 
 If you see the following, the outline was successfully loaded:
@@ -25,9 +27,13 @@ If you see the following, the outline was successfully loaded:
 Loaded data for [filename].
 Type help to list commands.
 ```
+</details>
 
-### Entering Grades
-
+<details>
+<summary>
+<h3>Entering Grades</h3>
+</summary>
+  
 To enter a grade, type the command:
 ```
 [π] > grade
@@ -54,10 +60,13 @@ and accept the confirmation. For example:
 Assignment 1 already has the grade 85.0%. Overwrite it with None? (y/n) y
 Updated Math 101 Assignment 1 to None.
 ```
-
-### Viewing Stats
-
+</details>
+<details>
+<summary>
+<h3>Viewing Stats</h3><br>
 PyGrades provides multiple statistics and tables based on your grades.
+</summary>
+
 See [Understanding Stats]() if you're unsure what any statistics mean.
 
 The easiest way to see your progress in a specific course is with the `summary` command:
@@ -115,12 +124,15 @@ Please select a course: 1
 | C     60%
 | D     50%
 ```
+</details>
 
-### Calculating Projections
-
+<details>
+<summary>
+<h3>Calculating Projections</h3><br>
 Beyond just seeing your current progress,
 PyGrades can help you plan for the future.
-
+</summary>
+<br>
 The `needed` command will calculate the average grade you
 need to get on your remaining assessments to achieve a certain grade.
 You can enter this grade as either a percentage or scale item:
@@ -142,8 +154,12 @@ grade you can achieve, accounting for grades that could be dropped:
 Please select a course: 1
 The maximum grade possible for Math 101 is 94.50% (A+)
 ```
+</details>
 
-### Creating an Outline
+<details>
+<summary>
+<h2>Creating an Outline</h2>
+</summary>
 
 To start tracking your own grades, you will have to provide a simple
 outline file that describes your courses.
@@ -158,7 +174,7 @@ from `Example.txt` and replace the data with your own courses
 
 <details>
 <summary>
-<h4>Outline Walkthrough</h4>
+<h3>Outline Walkthrough</h3>
 </summary>
   
 Each course needs a name, assessments, and optionally a grading scale.
@@ -305,4 +321,5 @@ Scale:
 1.3 67%
 1.0 60%
 ```
+</details>
 </details>
