@@ -1,5 +1,5 @@
 # PyGrades
-A lightweight tool for tracking and assessing grades.
+A command-line tool for students to track and assess their grades.
 
 ## Features
 
@@ -84,10 +84,10 @@ Please select a course: 1
 Again, you can directly provide course names,
 such as `[π] > summary math 101` or just `[π] > summary math`.
 
-You can use `[π] > summary all` to quickly get
+You can use `[π] > summary all` to quickly see
 the summaries of all your courses.
 
-The `overview` command will provide a simpler glance at your semeseter:
+The `overview` command will provide a simpler glance at your semester:
 ```
 [π] > overview
 ╭───────────┬────────────────┬────────────╮
@@ -142,3 +142,167 @@ grade you can achieve, accounting for grades that could be dropped:
 Please select a course: 1
 The maximum grade possible for Math 101 is 94.50% (A+)
 ```
+
+### Creating an Outline
+
+To start tracking your own grades, you will have to provide a simple
+outline file that describes your courses.
+
+Create a text file in `outlines/` and give it a name.
+This name could represent a specific semester, such as `Winter2025.txt`.
+
+Your outline **must have the correct formatting** in order to be
+correctly read by the program. You can simply copy and paste the text
+from `Example.txt` and replace the data with your own courses
+(adding more courses as needed), and/or refer to the following guide.
+
+<details>
+<summary>
+<h4>Outline Walkthrough</h4>
+</summary>
+  
+Each course needs a name, assessments, and optionally a grading scale.
+These categories have to be specified in that order.
+
+#### Course Names
+
+First, specify that you are providing a course name
+by typing `Course:`, then provide the name on the next line.
+For example:
+```
+Course:
+Math 101
+```
+
+**Notes**: 
+- The colon after `Course` is not required, but it helps with readability.
+- Your courses can be named anything (except for `all`, as that
+is a keyword used in the command `[π] > summary all`).
+- In the program, you can refer to courses by any
+of their identifiers (either `math` or `101` in the above example),
+so don't worry about making the names short.
+
+#### Assessments
+
+After your course name, add the line `Assessments:`, followed by
+the assessments themselves.
+
+First, specify the number of the particular assessment,
+then its name, then its weight followed by a percent sign.
+For example:
+```
+Assessments:
+2 Midterm 40%
+```
+This line says that there are two midterms in the course,
+with a weight of 40% (each midterm is worth 20% of the course grade.)
+
+If the lowest grades of an assessment are to be dropped, specify
+the number of dropped grades after the number of assessments, like so:
+```
+5 drop 1 Assignment 20%
+```
+This line says that there are five assignments, and one grade
+will be dropped. The total weight is then distributed across the
+remaining four assignments.
+
+If your course has varying weights for the same assessment,
+such as 25% for the better of two midterms and 15% for the worse,
+make sure to list these with different names. For example:
+```
+1 Midterm-Better 25%
+1 Midterm-Worse 15%
+```
+
+**Notes**:
+- The total weight of the assessments for a course
+  should add up to 100%.
+- Each assessment should be on its own line.
+- Assessments should not have spaces in their name.
+  You can use dashes to combine words, like in the example above.
+
+#### Grade Scales
+
+If your course has one, you can provide a grade scale
+(such as letter grades or GPAs).
+
+First, specify the category with `Scale:`, and start your
+scale on the next line.
+
+For each grade, provide a name, then the **minimum percentage**
+needed to achieve that grade, followed by a percent sign. For example:
+```
+Scale:
+A+ 90%
+A 80%
+B+ 75%
+B 70%
+C+ 65%
+C 60%
+D 50%
+```
+The grade names can be anything, including decimal GPAs:
+```
+Scale
+4.0 94%
+3.7 90%
+... and so on
+```
+
+**Notes:**
+- Each grade should be on its own line.
+- Grades should not have spaces in their name. Consider
+  using a colon or other characters if you wish to represent
+  grade ranges \
+  (ex. `A-:A+ 80%`).
+- You might encounter inconsistent formatting
+  when using the `[π] > scale` command if your grade names
+  vary in length.
+- Grades will be sorted in descending order by their percentage automatically.
+
+#### Full Outline
+
+After providing the assessments and optional grade scale
+for a course, start the next course on the next line,
+following the same steps.
+
+Here is a full example of a valid outline (`outlines/Example.txt`):
+```
+Course:
+Math 101
+
+Assessments:
+5 drop 1 Assignment 20%
+2 Midterm 40%
+1 Final 40%
+
+Scale:
+A+ 90%
+A 80%
+B+ 75%
+B 70%
+C+ 65%
+C 60%
+D 50%
+
+Course:
+Chem 200
+
+Assessments:
+6 Lab 30%
+8 drop 3 Quiz 20%
+1 Final 50%
+
+Scale:
+4.0 94%
+3.7 90%
+3.3 87%
+3.0 83%
+2.7 80%
+2.3 77%
+2.0 73%
+1.7 70%
+1.3 67%
+1.0 60%
+```
+</details>
