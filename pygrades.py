@@ -1,5 +1,11 @@
 import cmd
+import sys
+import signal
 from tabulate import tabulate
+
+if sys.platform == "win32":
+    import win32api
+    import win32con
 
 from utils import file_management as files
 from utils import input_output as io
@@ -27,17 +33,24 @@ class PyGrades(cmd.Cmd):
     # Cmd Overrides #
     # ============= #
 
+    if sys.platform == "win32":
+        def handle_close(self, event):
+            if event in (
+                win32con.CTRL_CLOSE_EVENT,
+                win32con.CTRL_LOGOFF_EVENT,
+                win32con.CTRL_SHUTDOWN_EVENT
+            ):
+                self.do_exit("")
+
     def customloop(self):
         '''cmdloop wrapper to gracefully exit on KeyboardInterrupt.'''
-        doExit = False
-        while not doExit:
+        self.exit = False
+        while not self.exit:
             try:
                 self.cmdloop()
             except KeyboardInterrupt:
                 print()
                 self.do_exit("")
-            finally:
-                doExit = True
 
     def preloop(self):
         print(SPLASH)
@@ -487,9 +500,10 @@ class PyGrades(cmd.Cmd):
         '''
         - Save and exit the program.
         '''
+        print("Saving and Exiting...")
         if hasattr(self, "courses") and hasattr(self, "filename"):
             files.write_data(self.courses, self.filename)
-            input("Saved data. Press Enter to exit.")
+        self.exit = True
         return True
     
     def do_quit(self, line):
@@ -504,6 +518,7 @@ class PyGrades(cmd.Cmd):
             print("You can save and exit by typing 'exit'.")
         else:
             print("Quitting...")
+            self.exit = True
             return True
 
     # ======= #
@@ -747,4 +762,12 @@ class PyGrades(cmd.Cmd):
 # ===== #
 
 if __name__ == '__main__':
-    PyGrades().customloop()
+    pg = PyGrades()
+
+    # setup OS exit handlers
+    if sys.platform == "win32":
+        win32api.SetConsoleCtrlHandler(pg.handle_close, True)
+    else:
+        signal.signal(signal.SIGTERM, lambda signum, frame: pg.do_exit(""))
+
+    pg.customloop()
