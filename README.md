@@ -193,6 +193,7 @@ Beyond just seeing your current progress,
 PyGrades can help you plan for the future.
 </summary>
 <br>
+  
 The `needed` command will calculate the average grade you
 need to get on your remaining assessments to achieve a certain grade.
 You can enter this grade as either a percentage or scale item:
