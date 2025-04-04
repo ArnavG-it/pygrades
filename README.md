@@ -12,17 +12,20 @@ A command-line tool for students to track and assess their grades.
 <h2>Screenshots</h2>
 </summary>
 <p align="left">
+  <!-- 570px width, 214px height -->
   <img 
-    src="https://github.com/user-attachments/assets/eb2979f2-b7e0-4053-b906-3a74369185e2"
-    hspace="5"
+    src="https://github.com/user-attachments/assets/5b3432ba-8bfe-4cfa-bfda-813fe1b862ac"
+    hspace="2"
   />
+  <!-- 261px width, 214px height -->
   <img
-    src="https://github.com/user-attachments/assets/0ecc0f4d-f1be-4c1a-8f73-2a75857b7f85"
-    hspace="1"
+    src="https://github.com/user-attachments/assets/523e9d12-e833-4141-98f6-eeff27e909b3"
+    hspace="2"
   />
+  <!-- 840px width -->
   <img
-    src="https://github.com/user-attachments/assets/109f32b7-6bf7-4b1e-b3aa-ca4f18c2bcf2"
-    hspace="5"
+    src="https://github.com/user-attachments/assets/9df471bd-446c-4b10-bb0b-17d428b34eed"
+    hspace="2"
   />
 </p>
 </details>
