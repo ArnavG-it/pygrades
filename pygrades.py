@@ -20,7 +20,8 @@ SPLASH = tabulate([[SPLASH_MESSAGE]], tablefmt="rounded_grid")
 HELP_ORDER = [
     "Evaluation:",
     "grade", "overview", "summary",
-    "scale", "max", "needed", "adjust",
+    "scale", "max", "needed",
+    "adjust", "dropnum",
     "Program:",
     "switch", "save", "exit", "quit", "help"
 ]
@@ -399,6 +400,80 @@ class PyGrades(cmd.Cmd):
             print(f"Updated {scale_key} for {course_name}.")
         else:
             print("Cancelled adjustment.")
+
+    def do_dropnum(self, line):
+        '''
+        - Update the dropped amount for an assessment.
+
+        Optional arguments:
+        [course] \t -> Course identifier
+        [assessment] \t -> Name of the assessment to update
+        [number] \t -> New number of assessments to drop
+
+        Syntax: dropnum [course] [assessment] [number]
+        '''
+        course_name, line = self.match_course(line)
+        if not course_name:
+            course_name = self.select_course()
+
+        course = self.courses[course_name]
+        assessments = course["assessments"]
+        assessments_keys = list(assessments.keys())
+
+        # create lowered key map to match input
+        assessments_lower_map = {key.lower(): key for key in assessments_keys}
+
+        # extract arguments for assessment and number
+        parts = line.split()
+        if len(parts) == 0:
+            assessment_name = None
+            new_number = None
+        elif len(parts) == 1:
+            assessment_name = parts[0]
+            new_number = None
+        else:
+            assessment_name = parts[0]
+            new_number = parts[1]
+
+        # resolve assessment key
+        if assessment_name in assessments_lower_map:
+            assessment_name = assessments_lower_map[assessment_name]
+        else:
+            print(io.numbered_list(
+                assessments,
+                suffix = lambda key: f" ({assessments[key]["dropped"]} dropped)"
+            ))
+            choice = io.input_until_valid(
+                "Enter the assessment to update: ",
+                lambda c: io.in_range(c, 1, len(assessments) + 1)
+            )
+            assessment_name = assessments_keys[int(choice) - 1]
+
+        assessment = assessments[assessment_name]
+        kept = assessment["amount"]
+        
+        if new_number is None or not new_number.isnumeric() or not (0 <= int(new_number) < kept):
+            new_number = int(io.input_until_valid(
+                "Enter the new dropped amount: ",
+                lambda c: io.in_range(c, 0, kept),
+                repeat_message="Invalid number. Enter the new dropped amount: "
+            ))
+        else:
+            new_number = int(new_number)
+
+        current_number = assessment["dropped"]
+        if current_number == new_number:
+            print(f"{assessment_name} already drops {new_number}.")
+        else:
+            conf = io.input_until_valid(
+                f"Drop {new_number} instead of {current_number} {assessment_name} in {course_name}? (y/n) ",
+                lambda c: io.yes_or_no(c)
+            )
+            if conf == 'y':
+                assessment["dropped"] = new_number
+                print(f"Updated {assessment_name}.")
+            else:
+                print("Cancelled update.")
         
     def do_needed(self, line):
         '''
