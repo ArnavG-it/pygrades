@@ -1,12 +1,36 @@
 # PyGrades
 A command-line tool for students to track and assess their grades.
+</p>
 
 - Saves data between sessions.
 - Tracks grades across multiple semesters.
 - Supports custom grade scales and drop policies.
 - Calculates important stats and projections.
 
-## Usage
+<details open>
+<summary>
+<h2>Screenshots</h2>
+</summary>
+<p align="left">
+  <img 
+    src="https://github.com/user-attachments/assets/eb2979f2-b7e0-4053-b906-3a74369185e2"
+    hspace="5"
+  />
+  <img
+    src="https://github.com/user-attachments/assets/0ecc0f4d-f1be-4c1a-8f73-2a75857b7f85"
+    hspace="1"
+  />
+  <img
+    src="https://github.com/user-attachments/assets/109f32b7-6bf7-4b1e-b3aa-ca4f18c2bcf2"
+    hspace="5"
+  />
+</p>
+</details>
+
+## Getting Started
+
+The following dropdowns provide plenty of tips on setting up and using PyGrades.
+
 <details>
 <summary>
 <h3>Loading Data</h3><br>
