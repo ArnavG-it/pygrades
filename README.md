@@ -7,6 +7,8 @@ A command-line tool for students to track and assess their grades.
 - Supports custom grade scales and drop policies.
 - Calculates important stats and projections.
 
+Made by a student who hates spreadsheets.
+
 <details open>
 <summary>
 <h2>Screenshots</h2>
@@ -33,7 +35,39 @@ A command-line tool for students to track and assess their grades.
 ## Getting Started
 
 The following sections provide plenty of tips on setting up and using PyGrades.\
-Make sure to also see [Creating an Outline](#creating-an-outline).
+Make sure to also see [Creating an Outline](#creating-an-outline) to start tracking your grades.
+
+<details>
+<summary>
+<h3>Installation</h3><br>
+PyGrades is easy to install.
+</summary>
+<br>
+
+The simplest way to install and start using PyGrades
+is by downloading `pygrades.zip` from the
+[latest release](https://github.com/ArnavG-it/pygrades/releases/latest).
+This includes an executable as well as an example outline file.
+Extract it anywhere on your computer and double-click the
+`pygrades` application to launch it.
+
+If you want to modify the program or prefer running
+the Python script rather than an executable,
+you can download the source code instead, either
+from the latest release or by cloning the repository.
+
+If you're using the source code, make sure you
+have a recent version of Python, then install
+the remaining dependencies using:
+```
+pip install -r requirements.txt
+```
+Then start the program using:
+```
+python pygrades.py
+```
+(or the equivalent command for your Python version, such as `python3`)
+</details>
 
 <details>
 <summary>
