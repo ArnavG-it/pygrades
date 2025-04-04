@@ -298,7 +298,7 @@ D 50%
 ```
 The grade names can be anything, including decimal GPAs:
 ```
-Scale
+Scale:
 4.0 94%
 3.7 90%
 ... and so on
@@ -308,8 +308,7 @@ Scale
 - Each grade should be on its own line.
 - Grades should not have spaces in their name. Consider
   using a colon or other characters if you wish to represent
-  grade ranges \
-  (ex. `A-:A+ 80%`).
+  grade ranges (ex. `A-:A+ 80%`).
 - You might encounter inconsistent formatting
   when using the `[π] > scale` command if your grade names
   vary in length.
@@ -361,3 +360,5 @@ Scale:
 1.0 60%
 ```
 </details>
+
+[Back to Top](#pygrades)
