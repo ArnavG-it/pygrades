@@ -32,7 +32,8 @@ A command-line tool for students to track and assess their grades.
 
 ## Getting Started
 
-The following dropdowns provide plenty of tips on setting up and using PyGrades.
+The following sections provide plenty of tips on setting up and using PyGrades.\
+Make sure to also see [Creating an Outline](#creating-an-outline).
 
 <details>
 <summary>
