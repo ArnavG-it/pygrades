@@ -81,7 +81,26 @@ To enter a grade, type the command:
 
 You will then be guided through the process of selecting a grade to enter, like so:
 
-![pygrades_grade](https://github.com/user-attachments/assets/6896f11a-d9dd-40bb-8b52-7cb19876db08)
+```
+[π] > grade
+1. Math 101
+2. Chem 200
+Please select a course: 1
+Assessments for Math 101:
+1. Assignment (0/5 graded)
+2. Midterm (0/2 graded)
+3. Final (pending)
+Please select an assessment: 1
+Grades for Assignment:
+1. None
+2. None
+3. None
+4. None
+5. None
+Please select which grade to update: 1
+Enter the grade for Assignment 1: 85%
+Updated Math 101 Assignment 1 to 85%.
+```
 
 The selection can be lengthy, so you can choose to provide the arguments yourself:
 ```
