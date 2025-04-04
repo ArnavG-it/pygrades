@@ -441,7 +441,7 @@ class PyGrades(cmd.Cmd):
         else:
             print(io.numbered_list(
                 assessments,
-                suffix = lambda key: f" ({assessments[key]["dropped"]} dropped)"
+                suffix = lambda key: f" ({assessments[key]["dropped"]} out of {assessments[key]["amount"]} dropped)"
             ))
             choice = io.input_until_valid(
                 "Enter the assessment to update: ",
@@ -454,7 +454,7 @@ class PyGrades(cmd.Cmd):
         
         if new_number is None or not new_number.isnumeric() or not (0 <= int(new_number) < kept):
             new_number = int(io.input_until_valid(
-                "Enter the new dropped amount: ",
+                "Enter the new dropped amount (must be less than the total amount): ",
                 lambda c: io.in_range(c, 0, kept),
                 repeat_message="Invalid number. Enter the new dropped amount: "
             ))
