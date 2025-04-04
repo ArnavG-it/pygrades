@@ -1,12 +1,12 @@
-Course
+Course:
 Math 101
 
-Assessments
+Assessments:
 5 drop 1 Assignment 20%
 2 Midterm 40%
 1 Final 40%
 
-Scale
+Scale:
 A+ 90%
 A 80%
 B+ 75%
@@ -15,15 +15,15 @@ C+ 65%
 C 60%
 D 50%
 
-Course
+Course:
 Chem 200
 
-Assessments
+Assessments:
 6 Lab 30%
 8 drop 3 Quiz 20%
 1 Final 50%
 
-Scale
+Scale:
 4.0 94%
 3.7 90%
 3.3 87%

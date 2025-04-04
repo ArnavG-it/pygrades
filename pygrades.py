@@ -154,7 +154,7 @@ class PyGrades(cmd.Cmd):
             choice = io.input_until_valid(
                 message = (
                     assessment_str +
-                    f" already has the grade {current_grade}%. Overwrite it with {new_grade}? (y/n) "
+                    f" already has the grade {current_grade}%. Overwrite it with {new_grade}%? (y/n) "
                 ),
                 func = lambda c:
                     io.yes_or_no(c)
