@@ -1,39 +1,51 @@
 # PyGrades
 A command-line tool for students to track and assess their grades.
 
-## Features
-
-- View your performance and see what you need to do to reach your target grade.
-
-- Save your data across sessions and track grades for multiple semesters.
-
-- Specify course outlines, such as grading scales and drop policies.
+- Saves data between sessions.
+- Tracks grades across multiple semesters.
+- Supports custom grade scales and drop policies.
+- Calculates important stats and projections.
 
 ## Usage
-
 <details>
 <summary>
-<h3>Loading an Outline</h3>
+<h3>Loading Data</h3><br>
+PyGrades can store and load from multiple data files.
 </summary>
-The first time you install and run PyGrades, you will be prompted to load the example outline.
+<br>
 
-You can:
+If PyGrades doesn't find any existing data, you will be asked to load the example outline.\
+You can either:
 - Type `y` and press Enter to proceed with the example (recommended for new users).
 - See [Creating an Outline](#creating-an-outline) and create your own outline.
-  You will need to restart the program to see new files.
+  You will need to restart the program to see the new outline.
 
-If you see the following, the outline was successfully loaded:
+If you do have existing data, you will be prompted to choose
+which file to load (or to load a new outline if you wish).\
+If you only have data from the example,
+you can enter `y` to load the example data or `n` to create
+new data from an outline:
+```
+Load data from Example? (Y/N)
+```
+
+If you see the following, the data was successfully loaded:
 ```
 Loaded data for [filename].
 Type help to list commands.
 ```
+
+**Note**: Changes made to an outline after it has been loaded will not affect 
+existing data. Reloading the outline will overwrite existing data for that semester,
+and the program will ask for confirmation before doing so.
 </details>
 
 <details>
 <summary>
-<h3>Entering Grades</h3>
+<h3>Entering Grades</h3><br>
+The most common action in a grade tracker.<br>
 </summary>
-  
+
 To enter a grade, type the command:
 ```
 [π] > grade
@@ -61,6 +73,7 @@ Assignment 1 already has the grade 85.0%. Overwrite it with None? (y/n) y
 Updated Math 101 Assignment 1 to None.
 ```
 </details>
+
 <details>
 <summary>
 <h3>Viewing Stats</h3><br>
@@ -156,12 +169,11 @@ The maximum grade possible for Math 101 is 94.50% (A+)
 ```
 </details>
 
-<details>
-<summary>
-<h2>Creating an Outline</h2>
-</summary>
 
-To start tracking your own grades, you will have to provide a simple
+## Creating an Outline
+
+Before being able to track your own grades,
+you will have to provide a simple
 outline file that describes your courses.
 
 Create a text file in `outlines/` and give it a name.
@@ -321,5 +333,4 @@ Scale:
 1.3 67%
 1.0 60%
 ```
-</details>
 </details>
