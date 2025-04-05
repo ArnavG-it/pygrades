@@ -286,7 +286,11 @@ The maximum grade possible for Math 101 is 94.50% (A+)
 Understanding the stats is key to taking advantage of them.
 </summary>
 
-#### The Summary Table
+<details>
+<summary>
+<h4>The Summary Table</h4>
+</summary>
+
 The `summary` command calculates lots of numbers based on your grades.
 The following example will be used for demonstration:
 ```
@@ -364,8 +368,13 @@ each having a **Weighted Total** in the last row.
   you will see the **corresponding grade** next to each weighted total
   (e.g., a `2.3` GPA corresponds to the weighted average of `78.80%`,
   and no grade corresponds to the achieved `27.40%`).
+</details>
 
-#### The Needed Command
+<details>
+<summary>
+<h4>The Needed Command</h4>
+</summary>
+
 The `needed` command tells you how well you need to do to achieve
 a certain grade, but what does this percentage actually represent?
 
@@ -392,7 +401,7 @@ Let's use the following example:
 The `needed` command is telling this student that they can
 achieve an A if they get `84%` on each remaining assessment.
 
-Say they did happen to score `84%` on every remaining assessment.
+Say they did score `84%` on every remaining assessment.
 Here's what the summary table would look like:
 ```
 [π] > summary math
@@ -419,8 +428,13 @@ the remaining assessments.
 Also, it is only calculating the **minimum grade** you need
 to achieve on your remaining assessments. Had this student
 scored slightly lower on their final exam, they would be sitting at a B+.
+</details>
 
-#### The Max Command
+<details>
+<summary>
+<h4>The Max Command</h4>
+</summary>
+
 The `max` command tells you the maximum grade you can achieve
 in a course, given the grades you've achieved so far.
 
@@ -473,7 +487,7 @@ a very difficult target to reach:
 [π] > needed math A+
 97.33% needed on remaining assessments to achieve 90.0% (A+).
 ```
-
+</details>
 </details>
 
 <details>
