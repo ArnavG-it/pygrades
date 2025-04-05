@@ -34,7 +34,10 @@ Made by a student who hates spreadsheets.
 
 ## Getting Started
 
-The following guide provides plenty of tips on setting up and using PyGrades.\
+The following guide provides plenty of tips on setting up and using PyGrades.
+To get up and running, you only need to follow the steps up to (and including) **The Help Command**,
+but reading the rest of the sections will let you get the most out of PyGrades.
+
 **Make sure to also see [Creating an Outline](#creating-an-outline) to start tracking your grades.**
 
 <details>
@@ -99,6 +102,34 @@ Type help to list commands.
 
 **Note**: Changes made to an outline after it has been loaded will not affect 
 existing data. See [Updating a Loaded Outline](#updating-a-loaded-outline).
+</details>
+
+<details>
+<summary>
+<h3>The Help Command</h3><br>
+The most important command.
+</summary>
+
+To see the list of commands that are available,
+including some not discussed in this README
+(such as `switch` and `quit`), type:
+```
+[π] > help
+```
+You can also quickly see the syntax of a specific command:
+```
+[π] > help grade
+- Update a grade.
+
+Optional arguments:
+[course]         -> Course identifier
+[assessment]     -> Assessment name
+[number]         -> Assessment number, if there are multiple
+[grade]          -> Received grade (can be "none")
+
+Syntax: grade [course] [assessment] [number] [grade]
+```
+
 </details>
 
 <details>
@@ -337,6 +368,56 @@ you will see the **corresponding grade** next to each weighted total
 and no grade corresponds to the achieved `27.40%`).
 </details>
 
+<details>
+<summary>
+<h3>Updating a Loaded Outline</h3><br>
+PyGrades provides some commands for updating course outlines on the fly.
+</summary>
+<br>
+
+**Note**: If you need to update the outline in a way
+that isn't mentioned in this section, your options are
+to:
+- Modify the outline file and reload it. You will have
+  to overwrite your save data corresponding to that outline
+  (or change the name of the outline file to avoid this)
+  and re-enter your grades.
+- Modify the `data/[filename].json` file corresponding to your outline.
+  This may corrupt your data, so **only do it if you are comfortable with JSON**
+  (a backup is available in `data/backup/`).
+
+<br>
+
+For courses that have a grading scale,
+you can change the minimum percentage of a grade:
+```
+[π] > adjust
+```
+For example:
+```
+[π] > adjust math A+ 87%
+Move A+ from 90% to 87%? (y/n) y
+Updated A+ for Math 101.
+```
+
+<br>
+
+You can update the number of dropped grades
+for an assessment using `dropnum`:
+```
+[π] > dropnum
+```
+For example:
+```
+[π] > dropnum math assignment 2
+Drop 2 instead of 1 Assignment in Math 101? (y/n) y
+Updated Assignment.
+```
+**Note**: PyGrades does not support dropping all grades of an assessment.
+For example, you cannot drop all 5 out of 5 assignments.
+
+</details>
+
 <br>
 
 ## Creating an Outline
@@ -346,7 +427,7 @@ you need to provide a simple
 outline file that describes your courses.
 
 Create a text file in `outlines/` and give it a name.
-This name could represent a specific semester, such as `Winter2025.txt`.
+This name could represent a specific semester, such as `Fall2025.txt`.
 
 You can then just copy and paste the text
 from `Example.txt` and replace the data with your own courses
