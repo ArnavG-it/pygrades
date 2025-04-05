@@ -34,13 +34,13 @@ Made by a student who hates spreadsheets.
 
 ## Getting Started
 
-The following sections provide plenty of tips on setting up and using PyGrades.\
-Make sure to also see [Creating an Outline](#creating-an-outline) to start tracking your grades.
+The following guide provides plenty of tips on setting up and using PyGrades.\
+**Make sure to also see [Creating an Outline](#creating-an-outline) to start tracking your grades.**
 
 <details>
 <summary>
 <h3>Installation</h3><br>
-PyGrades is easy to install.
+PyGrades takes just a few steps to install.
 </summary>
 <br>
 
@@ -98,8 +98,7 @@ Type help to list commands.
 ```
 
 **Note**: Changes made to an outline after it has been loaded will not affect 
-existing data. Reloading the outline will overwrite existing data for that semester,
-and the program will ask for confirmation before doing so.
+existing data. See [Updating a Loaded Outline](#updating-a-loaded-outline).
 </details>
 
 <details>
@@ -161,7 +160,7 @@ Updated Math 101 Assignment 1 to None.
 PyGrades provides multiple statistics and tables based on your grades.
 </summary>
 
-See [Understanding Stats]() if you're unsure what any statistics mean.
+See [Interpreting Stats](#interpreting-stats) if you're unsure what any statistics mean.
 
 The easiest way to see your progress in a specific course is with the `summary` command:
 ```
@@ -251,20 +250,110 @@ The maximum grade possible for Math 101 is 94.50% (A+)
 ```
 </details>
 
+<details>
+<summary>
+<h3>Interpreting Stats</h3><br>
+Understanding the stats is key to taking advantage of them.
+</summary>
+
+#### The Summary Table
+The `summary` command calculates lots of numbers based on your grades.
+The following example will be used for demonstration:
+```
+╭────────────┬─────────────────────────────┬───────────────┬────────────┬──────────╮
+│   Chem 200 │ Grades                      │       Average │   Achieved │   Weight │
+├────────────┼─────────────────────────────┼───────────────┼────────────┼──────────┤
+│        Lab │ 80, 70, 90                  │       80.00 % │    12.00 % │     30 % │
+│            │ (3 pending)                 │               │            │          │
+├────────────┼─────────────────────────────┼───────────────┼────────────┼──────────┤
+│       Quiz │ 90, 65, 80, 80, ~60~, 70    │       77.00 % │    15.40 % │     20 % │
+│            │ (2 pending, 2 more to drop) │               │            │          │
+├────────────┼─────────────────────────────┼───────────────┼────────────┼──────────┤
+│      Final │ (1 pending)                 │           n/a │        n/a │     50 % │
+├────────────┼─────────────────────────────┼───────────────┼────────────┼──────────┤
+│          • │ Weighted Totals:            │ (2.3) 78.80 % │    27.40 % │    100 % │
+╰────────────┴─────────────────────────────┴───────────────┴────────────┴──────────╯
+```
+
+In the **Grades** column, your grades for each assessment are listed in order.\
+**Notes**:
+
+- The number of pending grades and grades to be dropped are listed in brackets
+for each assignment.
+- If a grade is in tildes (such as `~60~`), it is one of your dropped grades
+and doesn't count towards any calculations.
+- Only the lowest excess grades are dropped. In the example above,
+  5 quizzes are to be kept, but 6 have been graded, so one grade
+  (`60%`) is dropped.
+
+There are three stat columns: **Average**, **Achieved**, and **Weight**.\
+These represent your progress in the course so far, your final grade
+for the course, and the weight of each assessment, respectively.
+
+\- The **Average** column simply shows the average of your grades
+for an assessment, not counting assessments that haven't been graded yet.
+<details>
+<summary>Calculation</summary>
+
+- For the Lab assessment, of the three graded assessments, the average is `80%`.
+- For the Quiz assessment, since six quizzes are graded and only five are to
+  be counted, the lowest grade of `60%` is dropped automatically.\
+  The average of the remaining five is then `77%`.
+- The Final assessment hasn't been graded yet, so it has no average.
+</details>
+
+\- The **Weighted Total Average** in the last row shows how
+well you're doing in the course currently. It accounts for
+the weights of each assessment, and ignores ungraded assessments.
+<details>
+<summary>Calculation</summary>
+  
+- For the Lab assessment, the weighted average is `80% x 30% = 24%`
+- For the Quiz assessment, the weighted average is `77% x 20% = 15.4%`
+- The total weight of the assessments (not counting the ungraded final)
+  is `30% + 20% = 50%`.
+- Therefore, the weighted total average is `(24% + 15.4%) / 50% = 78.8%`.
+</details>
+
+\- The **Achieved** column shows how much your grades in each assessment
+contribute to the final grade. Dropped grades don't count towards this.
+<details>
+<summary>Calculation</summary>
+  
+- For each assessment, the weighted average is multiplied by the number
+of graded assessments over the number of assessments that count towards the weight.
+- For the Lab assessment, the achieved weight is `80% x 30% x (3/6) = 24%`
+- For the Quiz assessment, the achieved weight is `77% x 20% x (5/5)= 15.4%`
+- The Final assessment has no grade, so it has no achieved weight.
+</details>
+
+\- The **Weighted Total Achieved** in the last row is the sum
+of the **Achieved** column. This is the total weight of the course you've secured,
+and it will likely be low until big assessments (like a final exam) have been graded.
+
+\- If your course has a grading scale,
+you will see the **corresponding grade** next to each weighted total
+(e.g., `2.3` corresponds to the weighted average of `78.80%`,
+and no grade corresponds to the achieved `27.40%`).
+</details>
+
+<br>
 
 ## Creating an Outline
 
 Before being able to track your own grades,
-you will have to provide a simple
+you need to provide a simple
 outline file that describes your courses.
 
 Create a text file in `outlines/` and give it a name.
 This name could represent a specific semester, such as `Winter2025.txt`.
 
-Your outline **must have the correct formatting** in order to be
-correctly read by the program. You can simply copy and paste the text
+You can then just copy and paste the text
 from `Example.txt` and replace the data with your own courses
-(adding more courses as needed), and/or refer to the following guide.
+(adding more courses as needed), or refer to the following
+walkthrough for more detailed help.
+
+**Note**: Your outline **must follow the correct formatting** in order to be read by the program.
 
 <details>
 <summary>
@@ -363,7 +452,7 @@ Scale:
 - Each grade should be on its own line.
 - Grades should not have spaces in their name. Consider
   using a colon or other characters if you wish to represent
-  grade ranges (ex. `A-:A+ 80%`).
+  grade ranges (e.g., `A-:A+ 80%`).
 - You might encounter inconsistent formatting
   when using the `[π] > scale` command if your grade names
   vary in length.
