@@ -586,4 +586,9 @@ Scale:
 ```
 </details>
 
+## Contributing
+Feel free to open an issue if you encounter a bug
+or want to see a new feature, or submit a pull request
+if you have the solution!
+
 [Back to Top](#pygrades)
