@@ -152,11 +152,10 @@ class PyGrades(cmd.Cmd):
         current_grade = grades[num]
 
         if current_grade is not None:
+            message = assessment_str + f" already has the grade {current_grade}%."
+            message += f" Overwrite it with {new_grade}{'%' if new_grade is not None else ''}? (y/n) "
             choice = io.input_until_valid(
-                message = (
-                    assessment_str +
-                    f" already has the grade {current_grade}%. Overwrite it with {new_grade}%? (y/n) "
-                ),
+                message = message,
                 func = lambda c:
                     io.yes_or_no(c)
             )

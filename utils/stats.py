@@ -62,7 +62,7 @@ def average(l: list):
 def total_graded_weight(assessments: dict):
     '''Calculates the weight of the course that has been graded.'''
     total = 0
-    for name, data in assessments.items():
+    for _name, data in assessments.items():
         grades = data["grades"]
         weight = data["weight"]
         _, dropped = filter_dropped(data)
@@ -90,11 +90,10 @@ def total_weighted_average(assessments: dict):
 
 def total_achieved(assessments: dict):
     '''Calculates the achieved weight of a course.'''
-    return (
-        total_weighted_average(assessments)
-        * total_graded_weight(assessments)
-        / 100
-    )
+    total = 0
+    for _name, data in assessments.items():
+        total += achieved_weight(data)
+    return total
 
 def needed_for_target(assessments: dict, target_grade) -> float | None:
     '''
