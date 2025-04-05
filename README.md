@@ -1,6 +1,5 @@
 # PyGrades
 A command-line tool for students to track and assess their grades.
-</p>
 
 - Saves data between sessions.
 - Tracks grades across multiple semesters.
@@ -47,12 +46,15 @@ PyGrades takes just a few steps to install.
 </summary>
 <br>
 
-The simplest way to install and start using PyGrades
-is by downloading `pygrades.zip` from the
+If you're on Windows, the simplest way to install and start using PyGrades
+is by downloading `pygrades(Windows).zip` from the
 [latest release](https://github.com/ArnavG-it/pygrades/releases/latest).
 This includes an executable as well as an example outline file.
 Extract it anywhere on your computer and double-click the
 `pygrades` application to launch it.
+
+If you're not on Windows, or prefer running the script directly,
+download `pygrades(Script).zip`.
 
 If you want to modify the program or prefer running
 the Python script rather than an executable,
@@ -321,51 +323,51 @@ There are three stat columns: **Average**, **Achieved**, and **Weight**.\
 These represent your progress in the course so far, your final grade
 for the course, and the weight of each assessment, respectively.
 
-\- The **Average** column simply shows the average of your grades
-for an assessment, not counting assessments that haven't been graded yet.
-<details>
-<summary>Calculation</summary>
+- The **Average** column simply shows the average of your grades
+  for an assessment, not counting assessments that haven't been graded yet.
+  <details>
+    <summary>Calculation</summary>
 
-- For the Lab assessment, of the three graded assessments, the average is `80%`.
-- For the Quiz assessment, since six quizzes are graded and only five are to
-  be counted, the lowest grade of `60%` is dropped automatically.\
-  The average of the remaining five is then `77%`.
-- The Final assessment hasn't been graded yet, so it has no average.
-</details>
+    - For the Lab assessment, of the three graded assessments, the average is `80%`.
+    - For the Quiz assessment, since six quizzes are graded and only five are to
+      be counted, the lowest grade of `60%` is dropped automatically.\
+      The average of the remaining five is then `77%`.
+    - The Final assessment hasn't been graded yet, so it has no average.
+  </details>
 
-\- The **Weighted Total Average** in the last row shows how
-well you're doing in the course currently. It accounts for
-the weights of each assessment, and ignores ungraded assessments.
-<details>
-<summary>Calculation</summary>
+- The **Weighted Total Average** in the last row shows how
+  well you're doing in the course currently. It accounts for
+  the weights of each assessment, and ignores ungraded assessments.
+  <details>
+    <summary>Calculation</summary>
   
-- For the Lab assessment, the weighted average is `80% x 30% = 24%`
-- For the Quiz assessment, the weighted average is `77% x 20% = 15.4%`
-- The total weight of the assessments (not counting the ungraded final)
-  is `30% + 20% = 50%`.
-- Therefore, the weighted total average is `(24% + 15.4%) / 50% = 78.8%`.
-</details>
+    - For the Lab assessment, the weighted average is `80% x 30% = 24%`
+    - For the Quiz assessment, the weighted average is `77% x 20% = 15.4%`
+    - The total weight of the assessments (not counting the ungraded final)
+      is `30% + 20% = 50%`.
+    - Therefore, the weighted total average is `(24% + 15.4%) / 50% = 78.8%`.
+  </details>
 
-\- The **Achieved** column shows how much your grades in each assessment
-contribute to the final grade. Dropped grades don't count towards this.
-<details>
-<summary>Calculation</summary>
+- The **Achieved** column shows how much your grades in each assessment
+  contribute to the final grade. Dropped grades don't count towards this.
+  <details>
+    <summary>Calculation</summary>
   
-- For each assessment, the weighted average is multiplied by the number
-of graded assessments over the number of assessments that count towards the weight.
-- For the Lab assessment, the achieved weight is `80% x 30% x (3/6) = 24%`
-- For the Quiz assessment, the achieved weight is `77% x 20% x (5/5)= 15.4%`
-- The Final assessment has no grade, so it has no achieved weight.
-</details>
+    - For each assessment, the weighted average is multiplied by the number
+      of graded assessments over the number of assessments that count towards the weight.
+    - For the Lab assessment, the achieved weight is `80% x 30% x (3/6) = 24%`
+    - For the Quiz assessment, the achieved weight is `77% x 20% x (5/5)= 15.4%`
+    - The Final assessment has no grade, so it has no achieved weight.
+  </details>
 
-\- The **Weighted Total Achieved** in the last row is the sum
-of the **Achieved** column. This is the total weight of the course you've secured,
-and it will likely be low until big assessments (like a final exam) have been graded.
+- The **Weighted Total Achieved** in the last row is the sum
+  of the **Achieved** column. This is the total weight of the course you've secured,
+  and it will likely be low until big assessments (like a final exam) have been graded.
 
-\- If your course has a grading scale,
-you will see the **corresponding grade** next to each weighted total
-(e.g., `2.3` corresponds to the weighted average of `78.80%`,
-and no grade corresponds to the achieved `27.40%`).
+- If your course has a grading scale,
+  you will see the **corresponding grade** next to each weighted total
+  (e.g., a `2.3` GPA corresponds to the weighted average of `78.80%`,
+  and no grade corresponds to the achieved `27.40%`).
 </details>
 
 <details>
@@ -456,7 +458,7 @@ Math 101
 
 **Notes**: 
 - The colon after `Course` is not required, but it helps with readability.
-- Your courses can be named anything (except for `all`, as that
+- Your courses can be named anything (except `all`, as that
 is a keyword used in the command `[π] > summary all`).
 - In the program, you can refer to courses by any
 of their identifiers (either `math` or `101` in the above example),
