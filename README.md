@@ -316,9 +316,8 @@ and doesn't count towards any calculations.
   5 quizzes are to be kept, but 6 have been graded, so one grade
   (`60%`) is dropped.
 
-There are three stat columns: **Average**, **Achieved**, and **Weight**.\
-These represent your progress in the course so far, your final grade
-for the course, and the weight of each assessment, respectively.
+There are two stat columns: **Average** and **Achieved**,
+each having a **Weighted Total** in the last row.
 
 - The **Average** column simply shows the average of your grades
   for an assessment, not counting assessments that haven't been graded yet.
@@ -332,7 +331,7 @@ for the course, and the weight of each assessment, respectively.
     - The Final assessment hasn't been graded yet, so it has no average.
   </details>
 
-- The **Weighted Total Average** in the last row shows how
+- The **Weighted Total Average** shows how
   well you're doing in the course currently. It accounts for
   the weights of each assessment, and ignores ungraded assessments.
   <details>
@@ -357,7 +356,7 @@ for the course, and the weight of each assessment, respectively.
     - The Final assessment has no grade, so it has no achieved weight.
   </details>
 
-- The **Weighted Total Achieved** in the last row is the sum
+- The **Weighted Total Achieved** is the sum
   of the **Achieved** column. This is the total weight of the course you've secured,
   and it will likely be low until big assessments (like a final exam) have been graded.
 
@@ -365,6 +364,116 @@ for the course, and the weight of each assessment, respectively.
   you will see the **corresponding grade** next to each weighted total
   (e.g., a `2.3` GPA corresponds to the weighted average of `78.80%`,
   and no grade corresponds to the achieved `27.40%`).
+
+#### The Needed Command
+The `needed` command tells you how well you need to do to achieve
+a certain grade, but what does this percentage actually represent?
+
+Let's use the following example:
+```
+[π] > summary math
+╭────────────┬────────────────────────┬──────────────┬────────────┬──────────╮
+│   Math 101 │ Grades                 │      Average │   Achieved │   Weight │
+├────────────┼────────────────────────┼──────────────┼────────────┼──────────┤
+│ Assignment │ 60, 80                 │      70.00 % │     7.00 % │     20 % │
+│            │ (3 pending, 1 to drop) │              │            │          │
+├────────────┼────────────────────────┼──────────────┼────────────┼──────────┤
+│    Midterm │ 65                     │      65.00 % │    13.00 % │     40 % │
+│            │ (1 pending)            │              │            │          │
+├────────────┼────────────────────────┼──────────────┼────────────┼──────────┤
+│      Final │ (1 pending)            │          n/a │        n/a │     40 % │
+├────────────┼────────────────────────┼──────────────┼────────────┼──────────┤
+│          • │ Weighted Totals:       │ (C+) 66.67 % │    20.00 % │    100 % │
+╰────────────┴────────────────────────┴──────────────┴────────────┴──────────╯
+
+[π] > needed math A
+84.00% needed on remaining assessments to achieve 80.0% (A).
+```
+The `needed` command is telling this student that they can
+achieve an A if they get `84%` on each remaining assessment.
+
+Say they did happen to score `84%` on every remaining assessment.
+Here's what the summary table would look like:
+```
+[π] > summary math
+╭────────────┬──────────────────────┬─────────────┬─────────────┬──────────╮
+│   Math 101 │ Grades               │     Average │    Achieved │   Weight │
+├────────────┼──────────────────────┼─────────────┼─────────────┼──────────┤
+│ Assignment │ ~60~, 80, 84, 84, 84 │     83.00 % │     16.60 % │     20 % │
+├────────────┼──────────────────────┼─────────────┼─────────────┼──────────┤
+│    Midterm │ 65, 84               │     74.50 % │     29.80 % │     40 % │
+├────────────┼──────────────────────┼─────────────┼─────────────┼──────────┤
+│      Final │ 84                   │     84.00 % │     33.60 % │     40 % │
+├────────────┼──────────────────────┼─────────────┼─────────────┼──────────┤
+│          • │ Weighted Totals:     │ (A) 80.00 % │ (A) 80.00 % │    100 % │
+╰────────────┴──────────────────────┴─────────────┴─────────────┴──────────╯
+```
+Notice that PyGrades accounted for the drop policy of the assignments,
+and after dropping the lowest assignment the student did achieve an A.
+
+But, getting exactly `84%` on every assessment is unlikely.
+Therefore, **the needed percentage should be treated as a weighted average**
+of what you need to hit your target grade, distributed between
+the remaining assessments.
+
+Also, it is only calculating the **minimum grade** you need
+to achieve on your remaining assessments. Had this student
+scored slightly lower on their final exam, they would be sitting at a B+.
+
+#### The Max Command
+The `max` command tells you the maximum grade you can achieve
+in a course, given the grades you've achieved so far.
+
+It's important to keep in mind that this stat can
+be misleading if not used in tandem with the `needed` stat.
+Here's an example:
+```
+[π] > summary math
+╭────────────┬────────────────────────┬──────────────┬────────────┬──────────╮
+│   Math 101 │ Grades                 │      Average │   Achieved │   Weight │
+├────────────┼────────────────────────┼──────────────┼────────────┼──────────┤
+│ Assignment │ 60, 80                 │      70.00 % │     7.00 % │     20 % │
+│            │ (3 pending, 1 to drop) │              │            │          │
+├────────────┼────────────────────────┼──────────────┼────────────┼──────────┤
+│    Midterm │ 65                     │      65.00 % │    13.00 % │     40 % │
+│            │ (1 pending)            │              │            │          │
+├────────────┼────────────────────────┼──────────────┼────────────┼──────────┤
+│      Final │ (1 pending)            │          n/a │        n/a │     40 % │
+├────────────┼────────────────────────┼──────────────┼────────────┼──────────┤
+│          • │ Weighted Totals:       │ (C+) 66.67 % │    20.00 % │    100 % │
+╰────────────┴────────────────────────┴──────────────┴────────────┴──────────╯
+
+[π] > max math
+The maximum grade possible for Math 101 is 92.00% (A+)
+```
+According to the `max` command, this student can still achieve an
+A+ despite being at a C+ currently. Say this motivates them and they 
+perform very well in the rest of the course,
+getting `95%` on every remaining assessment:
+```
+[π] > summary math
+╭────────────┬──────────────────────┬─────────────┬─────────────┬──────────╮
+│   Math 101 │ Grades               │     Average │    Achieved │   Weight │
+├────────────┼──────────────────────┼─────────────┼─────────────┼──────────┤
+│ Assignment │ ~60~, 80, 95, 95, 95 │     91.25 % │     18.25 % │     20 % │
+├────────────┼──────────────────────┼─────────────┼─────────────┼──────────┤
+│    Midterm │ 65, 95               │     80.00 % │     32.00 % │     40 % │
+├────────────┼──────────────────────┼─────────────┼─────────────┼──────────┤
+│      Final │ 95                   │     95.00 % │     38.00 % │     40 % │
+├────────────┼──────────────────────┼─────────────┼─────────────┼──────────┤
+│          • │ Weighted Totals:     │ (A) 88.25 % │ (A) 88.25 % │    100 % │
+╰────────────┴──────────────────────┴─────────────┴─────────────┴──────────╯
+```
+After all those great grades, they still didn't end up at an A+.
+
+If they used the `needed` command to see what they needed to
+get an A+ initially, it would have been clear that this was
+a very difficult target to reach:
+```
+[π] > needed math A+
+97.33% needed on remaining assessments to achieve 90.0% (A+).
+```
+
 </details>
 
 <details>
@@ -433,7 +542,7 @@ from `Example.txt` and replace the data with your own courses
 (adding more courses as needed), or refer to the following
 walkthrough for more detailed help.
 
-**Note**: Your outline **must follow the correct formatting** in order to be read by the program.
+**Note**: Your outline **must follow the correct formatting** in order to be understood by the program.
 
 <details>
 <summary>
