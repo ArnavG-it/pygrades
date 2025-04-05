@@ -47,30 +47,27 @@ PyGrades takes just a few steps to install.
 <br>
 
 If you're on Windows, the simplest way to install and start using PyGrades
-is by downloading `pygrades(Windows).zip` from the
+is by downloading `pygrades.Script.zip` from the
 [latest release](https://github.com/ArnavG-it/pygrades/releases/latest).
-This includes an executable as well as an example outline file.
 Extract it anywhere on your computer and double-click the
 `pygrades` application to launch it.
 
-If you're not on Windows, or prefer running the script directly,
-download `pygrades(Script).zip`.
-
-If you want to modify the program or prefer running
-the Python script rather than an executable,
-you can download the source code instead, either
-from the latest release or by cloning the repository.
-
-If you're using the source code, make sure you
-have a recent version of Python, then install
-the remaining dependencies using:
+If you're on Mac or Linux, or just prefer running the script directly,
+follow these steps:
+1. Install a recent version of [Python 3](https://www.python.org/downloads/),
+   if you don't have it already.
+2. Download `pygrades.Script.zip` from the latest release and
+   extract it anywhere on your computer.
+3. Navigate to the extracted `pygrades` folder in your terminal.
+4. Install the required packages using:
 ```
 pip install -r requirements.txt
 ```
-Then start the program using:
+5. Start the program using:
 ```
 python pygrades.py
 ```
+
 (or the equivalent command for your Python version, such as `python3`)
 </details>
 
