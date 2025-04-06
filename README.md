@@ -67,8 +67,16 @@ pip install -r requirements.txt
 ```
 python pygrades.py
 ```
+(or the equivalent command for your Python version, such as `python3`)\
+**Note**: If you want to create an executable for your own operating system,
+you can do:
+```
+pip install pyinstaller
+pyinstaller --onefile pygrades.py
+```
+The executable will be created in `pygrades/dist/`. Move it to
+`pygrades/` to let it access your outlines and data.
 
-(or the equivalent command for your Python version, such as `python3`)
 </details>
 
 <details>
